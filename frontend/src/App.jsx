@@ -452,16 +452,88 @@ function App() {
 // Modal versions of Login/Signup
 function LoginModal({ onSwitch }) {
   const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Store token and user data
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        alert(`Welcome back, ${data.user.name}!`);
+        window.location.reload(); // Refresh to update UI
+      } else {
+        setError(data.message || 'Login failed');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('Network error. Please check if the backend server is running.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="auth-card">
       <h2 className="auth-title">Login to UniEats</h2>
-      <form className="auth-form">
-        <input type="email" placeholder="Email" className="auth-input" required />
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <input 
+          type="email" 
+          name="email"
+          placeholder="Email" 
+          className="auth-input"
+          value={formData.email}
+          onChange={handleChange}
+          required 
+        />
         <div className="auth-password-row">
-          <input type={showPassword ? "text" : "password"} placeholder="Password" className="auth-input" required />
-          <button type="button" className="auth-show-btn" onClick={() => setShowPassword(v => !v)}>{showPassword ? "Hide" : "Show"}</button>
+          <input 
+            type={showPassword ? "text" : "password"} 
+            name="password"
+            placeholder="Password" 
+            className="auth-input"
+            value={formData.password}
+            onChange={handleChange}
+            required 
+          />
+          <button type="button" className="auth-show-btn" onClick={() => setShowPassword(v => !v)}>
+            {showPassword ? "Hide" : "Show"}
+          </button>
         </div>
-        <button className="auth-btn" type="submit">Login</button>
+        {error && <div style={{color:'#ff6a1a', marginBottom: '10px', fontSize: '0.9rem'}}>{error}</div>}
+        <button className="auth-btn" type="submit" disabled={loading}>
+          {loading ? 'Signing In...' : 'Login'}
+        </button>
       </form>
       <div className="auth-forgot-row">
         <a href="#" className="auth-link">Forgot password?</a>
@@ -475,26 +547,153 @@ function LoginModal({ onSwitch }) {
 function SignupModal({ onSwitch }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phone: '',
+    collegeId: '',
+    role: 'student'
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    // Basic validation
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+          phone: formData.phone,
+          collegeId: formData.collegeId
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Registration successful! You can now login.');
+        onSwitch(); // Switch to login modal
+      } else {
+        setError(data.message || 'Registration failed');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      setError('Network error. Please check if the backend server is running.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="auth-card">
       <h2 className="auth-title">Create Your UniEats Account</h2>
-      <form className="auth-form">
-        <input type="text" placeholder="Name" className="auth-input" required />
-        <input type="email" placeholder="College Email ID" className="auth-input" required />
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <input 
+          type="text" 
+          name="name"
+          placeholder="Name" 
+          className="auth-input" 
+          value={formData.name}
+          onChange={handleChange}
+          required 
+        />
+        <input 
+          type="email" 
+          name="email"
+          placeholder="College Email ID" 
+          className="auth-input"
+          value={formData.email}
+          onChange={handleChange}
+          required 
+        />
+        <input 
+          type="text" 
+          name="collegeId"
+          placeholder="College ID" 
+          className="auth-input"
+          value={formData.collegeId}
+          onChange={handleChange}
+          required 
+        />
+        <input 
+          type="tel" 
+          name="phone"
+          placeholder="Phone Number" 
+          className="auth-input"
+          value={formData.phone}
+          onChange={handleChange}
+        />
         <div className="auth-password-row">
-          <input type={showPassword ? "text" : "password"} placeholder="Password" className="auth-input" required />
-          <button type="button" className="auth-show-btn" onClick={() => setShowPassword(v => !v)}>{showPassword ? "Hide" : "Show"}</button>
+          <input 
+            type={showPassword ? "text" : "password"} 
+            name="password"
+            placeholder="Password" 
+            className="auth-input"
+            value={formData.password}
+            onChange={handleChange}
+            required 
+          />
+          <button type="button" className="auth-show-btn" onClick={() => setShowPassword(v => !v)}>
+            {showPassword ? "Hide" : "Show"}
+          </button>
         </div>
         <div className="auth-password-row">
-          <input type={showConfirm ? "text" : "password"} placeholder="Confirm Password" className="auth-input" required />
-          <button type="button" className="auth-show-btn" onClick={() => setShowConfirm(v => !v)}>{showConfirm ? "Hide" : "Show"}</button>
+          <input 
+            type={showConfirm ? "text" : "password"} 
+            name="confirmPassword"
+            placeholder="Confirm Password" 
+            className="auth-input"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required 
+          />
+          <button type="button" className="auth-show-btn" onClick={() => setShowConfirm(v => !v)}>
+            {showConfirm ? "Hide" : "Show"}
+          </button>
         </div>
         <div className="auth-upload-row">
           <label className="auth-upload-label">College ID Card Proof:</label>
-          <input type="file" accept="image/*,.pdf" className="auth-upload-input" required />
+          <input type="file" accept="image/*,.pdf" className="auth-upload-input" />
+          <small style={{color: '#888', fontSize: '0.9rem'}}>File upload will be implemented later</small>
         </div>
+        {error && <div style={{color:'#ff6a1a', marginBottom: '10px', fontSize: '0.9rem'}}>{error}</div>}
         <div className="auth-password-note">Password must be at least 6 characters and contain a number.</div>
-        <button className="auth-btn" type="submit">Sign Up</button>
+        <button className="auth-btn" type="submit" disabled={loading}>
+          {loading ? 'Creating Account...' : 'Sign Up'}
+        </button>
       </form>
       <div className="auth-switch">
         Already have an account? <button className="auth-link" onClick={onSwitch}>Login</button>

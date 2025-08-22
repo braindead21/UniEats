@@ -1,14 +1,36 @@
 const express = require('express');
+const {
+  register,
+  login,
+  logout,
+  getMe,
+  updateDetails,
+  updatePassword,
+  forgotPassword,
+  resetPassword
+} = require('../controllers/authController');
+
+const { protect } = require('../middleware/auth');
+const {
+  validateRegister,
+  validateLogin,
+  validatePasswordUpdate,
+  validateProfileUpdate,
+  handleValidationErrors
+} = require('../middleware/validation');
+
 const router = express.Router();
 
-// Register
-router.post('/register', (req, res) => {
-  res.json({ message: 'Register endpoint (not implemented yet)' });
-});
+// Public routes
+router.post('/register', validateRegister, handleValidationErrors, register);
+router.post('/login', validateLogin, handleValidationErrors, login);
+router.post('/forgotpassword', forgotPassword);
+router.put('/resetpassword/:resettoken', resetPassword);
 
-// Login
-router.post('/login', (req, res) => {
-  res.json({ message: 'Login endpoint (not implemented yet)' });
-});
+// Protected routes
+router.get('/logout', logout);
+router.get('/me', protect, getMe);
+router.put('/updatedetails', protect, validateProfileUpdate, handleValidationErrors, updateDetails);
+router.put('/updatepassword', protect, validatePasswordUpdate, handleValidationErrors, updatePassword);
 
 module.exports = router; 

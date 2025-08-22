@@ -1,0 +1,41 @@
+# UniEats API Testing
+
+## Test User Registration
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123",
+  "role": "student",
+  "phone": "1234567890",
+  "collegeId": "COLLEGE123"
+}
+
+###
+
+## Test User Login
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+###
+
+## Test Get Current User (requires authentication)
+GET http://localhost:5000/api/auth/me
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+## Test API Health
+GET http://localhost:5000/api/ping
+
+###
+
+## Test Main Endpoint
+GET http://localhost:5000/
