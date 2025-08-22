@@ -1,0 +1,20 @@
+# Root level gitignore for UniEats project
+
+# Backend environment files
+backend/.env
+backend/.env.*
+
+# Logs
+*.log
+npm-debug.log*
+
+# Dependencies
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
