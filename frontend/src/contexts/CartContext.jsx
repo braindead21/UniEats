@@ -1,8 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { api } from '../services/api';
+
+console.log('CartContext.jsx loaded - version 2.0');
 
 const CartContext = createContext();
 
-export const useCart = () => {
+const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
     throw new Error('useCart must be used within a CartProvider');
@@ -13,11 +16,14 @@ export const useCart = () => {
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [restaurantId, setRestaurantId] = useState(null);
+  const [restaurant, setRestaurant] = useState(null);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   // Load cart from localStorage on mount
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     const savedRestaurantId = localStorage.getItem('cartRestaurantId');
+    const savedRestaurant = localStorage.getItem('cartRestaurant');
     
     if (savedCart) {
       try {
@@ -30,6 +36,14 @@ export const CartProvider = ({ children }) => {
     if (savedRestaurantId) {
       setRestaurantId(savedRestaurantId);
     }
+
+    if (savedRestaurant) {
+      try {
+        setRestaurant(JSON.parse(savedRestaurant));
+      } catch (error) {
+        console.error('Error loading restaurant from localStorage:', error);
+      }
+    }
   }, []);
 
   // Save cart to localStorage whenever it changes
@@ -40,7 +54,12 @@ export const CartProvider = ({ children }) => {
     } else {
       localStorage.removeItem('cartRestaurantId');
     }
-  }, [cartItems, restaurantId]);
+    if (restaurant) {
+      localStorage.setItem('cartRestaurant', JSON.stringify(restaurant));
+    } else {
+      localStorage.removeItem('cartRestaurant');
+    }
+  }, [cartItems, restaurantId, restaurant]);
 
   const addToCart = (item, quantity = 1) => {
     // Check if this item is from a different restaurant
@@ -53,6 +72,9 @@ export const CartProvider = ({ children }) => {
     }
 
     setRestaurantId(item.restaurantId);
+    if (item.restaurant) {
+      setRestaurant(item.restaurant);
+    }
 
     setCartItems(prevItems => {
       const existingItem = prevItems.find(cartItem => cartItem._id === item._id);
@@ -75,9 +97,10 @@ export const CartProvider = ({ children }) => {
     setCartItems(prevItems => {
       const updatedItems = prevItems.filter(item => item._id !== itemId);
       
-      // If cart is empty, clear restaurant ID
+      // If cart is empty, clear restaurant info
       if (updatedItems.length === 0) {
         setRestaurantId(null);
+        setRestaurant(null);
       }
       
       return updatedItems;
@@ -102,6 +125,7 @@ export const CartProvider = ({ children }) => {
   const clearCart = () => {
     setCartItems([]);
     setRestaurantId(null);
+    setRestaurant(null);
   };
 
   const getCartTotal = () => {
@@ -121,9 +145,84 @@ export const CartProvider = ({ children }) => {
     return item ? item.quantity : 0;
   };
 
+  // Calculate pricing breakdown
+  const getPricingBreakdown = () => {
+    const subtotal = getCartTotal();
+    const tax = Math.round(subtotal * 0.05); // 5% tax
+    const deliveryFee = subtotal > 300 ? 0 : 40; // Free delivery above ₹300
+    const platformFee = Math.round(subtotal * 0.02); // 2% platform fee
+    const total = subtotal + tax + deliveryFee + platformFee;
+
+    return {
+      subtotal,
+      tax,
+      deliveryFee,
+      platformFee,
+      total
+    };
+  };
+
+  // Checkout function
+  const checkout = async (deliveryAddress, paymentMethod, specialInstructions = '') => {
+    console.log('Checkout function called with:', { deliveryAddress, paymentMethod, specialInstructions });
+    console.log('Current cart items:', cartItems);
+    console.log('Current restaurant ID:', restaurantId);
+    
+    if (cartItems.length === 0) {
+      throw new Error('Cart is empty');
+    }
+
+    if (!restaurantId) {
+      throw new Error('No restaurant selected');
+    }
+
+    setIsCheckingOut(true);
+
+    try {
+      const orderData = {
+        items: cartItems.map(item => ({
+          menuItemId: item._id,
+          quantity: item.quantity,
+          customizations: item.customizations || [],
+          variant: item.variant || null,
+          specialInstructions: item.specialInstructions || ''
+        })),
+        restaurantId,
+        deliveryAddress,
+        paymentMethod,
+        specialInstructions
+      };
+
+      console.log('Sending order data:', orderData);
+      const response = await api.post('/orders', orderData);
+      console.log('Order response:', response);
+
+      if (response && response.success) {
+        // Clear cart after successful order
+        clearCart();
+        return {
+          success: true,
+          order: response.order,
+          message: response.message || 'Order placed successfully!'
+        };
+      } else {
+        throw new Error((response && response.message) || 'Order placement failed - no response data');
+      }
+
+    } catch (error) {
+      console.error('Checkout error:', error);
+      console.error('Error response:', error.response);
+      throw new Error(error.response?.data?.message || error.message || 'Checkout failed');
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
+
   const value = {
     cartItems,
     restaurantId,
+    restaurant,
+    isCheckingOut,
     addToCart,
     removeFromCart,
     updateQuantity,
@@ -132,6 +231,8 @@ export const CartProvider = ({ children }) => {
     getCartCount,
     isItemInCart,
     getItemQuantity,
+    getPricingBreakdown,
+    checkout,
   };
 
   return (
@@ -140,3 +241,5 @@ export const CartProvider = ({ children }) => {
     </CartContext.Provider>
   );
 };
+
+export { useCart };

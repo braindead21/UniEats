@@ -49,6 +49,46 @@ exports.protect = async (req, res, next) => {
   }
 };
 
+// Optional authentication - allows both authenticated and guest users
+exports.optionalAuth = async (req, res, next) => {
+  let token;
+
+  // Check for token in headers
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  // If no token, continue as guest
+  if (!token) {
+    req.user = null;
+    return next();
+  }
+
+  try {
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Get user from database
+    req.user = await User.findById(decoded.id).select('-password');
+
+    if (!req.user) {
+      req.user = null;
+      return next();
+    }
+
+    // Check if user is active
+    if (!req.user.isActive) {
+      req.user = null;
+      return next();
+    }
+
+    next();
+  } catch (error) {
+    req.user = null;
+    next();
+  }
+};
+
 // Grant access to specific roles
 exports.authorize = (...roles) => {
   return (req, res, next) => {

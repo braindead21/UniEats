@@ -4,6 +4,7 @@ import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext.jsx';
 import { useCart } from './contexts/CartContext.jsx';
 import { useRestaurants } from './hooks/useRestaurants.js';
+import { api } from './services/api.js';
 
 // ScrollInCard component for animation
 function ScrollInCard({ children, delay = 0, className = '', ...props }) {
@@ -105,37 +106,53 @@ function OrdersPage() {
 }
 
 function App() {
-  // Authentication and cart state
-  const { user, isAuthenticated, loading: authLoading, logout } = useAuth();
-  const { cartItems, getCartCount, addToCart, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
+    // Authentication and cart state
+  const { isAuthenticated, user, login, register, logout } = useAuth();
+  const { cartItems, getCartCount, addToCart, removeFromCart, updateQuantity, getCartTotal, clearCart, getPricingBreakdown, checkout, isCheckingOut, restaurant } = useCart();
   
   // Dynamic restaurant data
   const { restaurants: restaurantData, loading: restaurantsLoading } = useRestaurants();
+  
+  // Dynamic menu items
+  const [menuItems, setMenuItems] = useState([]);
+  const [menuLoading, setMenuLoading] = useState(true);
+  
+  // Fetch menu items from all restaurants
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        setMenuLoading(true);
+        console.log('Fetching menu items...');
+        const response = await api.get('/menu');
+        console.log('Menu response:', response);
+        setMenuItems(response.menu || []);
+      } catch (error) {
+        console.error('Error fetching menu items:', error);
+        setMenuItems([]);
+      } finally {
+        setMenuLoading(false);
+      }
+    };
+
+    fetchMenuItems();
+  }, []);
   
   // Static data (will be replaced with dynamic data later)
   const restaurantCategories = ['All', 'Indian', 'Chinese', 'Italian', 'Fast Food'];
   const [selectedRestaurantCategory, setSelectedRestaurantCategory] = useState('All');
   const filteredRestaurants = selectedRestaurantCategory === 'All'
     ? restaurantData
-    : restaurantData.filter(r => r.cuisine === selectedRestaurantCategory);
+    : restaurantData.filter(r => {
+        const cuisine = Array.isArray(r.cuisine) ? r.cuisine : [r.cuisine];
+        return cuisine.includes(selectedRestaurantCategory);
+      });
 
-  // Food items for the menu (will be fetched dynamically later)
-  const foodItems = [
-    { name: 'Classic Cheeseburger', price: 129, img: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=400&q=80', category: 'Burgers' },
-    { name: 'Paneer Tikka', price: 99, img: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80', category: 'Biryani' },
-    { name: 'Veg Hakka Noodles', price: 89, img: 'https://images.unsplash.com/photo-1464306076886-debca5e8a6b0?auto=format&fit=crop&w=400&q=80', category: 'Rolls' },
-    { name: 'Margherita Pizza', price: 149, img: 'https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80', category: 'Pizzas' },
-    { name: 'Café Mocha', price: 59, img: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80', category: 'Beverages' },
-    { name: 'French Fries', price: 49, img: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80', category: 'Snacks' },
-    { name: 'Farmhouse Pizza', price: 179, img: 'https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80', category: 'Pizzas' },
-    { name: 'Chicken Biryani', price: 159, img: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80', category: 'Biryani' },
-    { name: 'Paneer Roll', price: 79, img: 'https://images.unsplash.com/photo-1464306076886-debca5e8a6b0?auto=format&fit=crop&w=400&q=80', category: 'Rolls' },
-  ];
-  const foodCategories = ['All', 'Pizzas', 'Biryani', 'Rolls', 'Burgers', 'Beverages', 'Snacks'];
+  // Dynamic food categories based on menu items
+  const foodCategories = ['All', ...new Set(menuItems.map(item => item.category))];
   const [selectedFoodCategory, setSelectedFoodCategory] = useState('All');
   const filteredFoodItems = selectedFoodCategory === 'All'
-    ? foodItems
-    : foodItems.filter(item => item.category === selectedFoodCategory);
+    ? menuItems
+    : menuItems.filter(item => item.category === selectedFoodCategory);
 
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
@@ -244,6 +261,11 @@ function App() {
             <section className="popular-section" id="restaurants">
               <h2 className="popular-title">Popular Restaurants</h2>
               <p className="popular-desc">Discover amazing food from top-rated restaurants near your campus</p>
+              
+              {/* Debug Info */}
+              {restaurantsLoading && <p>Loading restaurants...</p>}
+              {!restaurantsLoading && <p>Found {restaurantData.length} restaurants</p>}
+              
               <div className="category-filters">
                 {restaurantCategories.map((cat) => (
                   <button
@@ -260,15 +282,15 @@ function App() {
                 {filteredRestaurants.map((r, i) => (
                   <ScrollInCard
                     className="restaurant-card"
-                    key={r.name + r.cuisine}
+                    key={r._id || r.name + r.cuisine}
                     delay={i * 80}
                   >
-                    <img src={r.img} alt={r.name} className="restaurant-img" />
+                    <img src={r.image || r.img} alt={r.name} className="restaurant-img" />
                     {r.tag && <span className="restaurant-tag">{r.tag}</span>}
                     <div className="restaurant-info">
                       <h3 className="restaurant-name">{r.name}</h3>
                       <div className="restaurant-meta">
-                        <span className="restaurant-cuisine">{r.cuisine}</span>
+                        <span className="restaurant-cuisine">{Array.isArray(r.cuisine) ? r.cuisine.join(', ') : r.cuisine}</span>
                         <span className="restaurant-rating">⭐ {r.rating}</span>
                       </div>
                     </div>
@@ -285,6 +307,11 @@ function App() {
             <section className="menu-section" id="menu">
               <h2 className="menu-title">Menu</h2>
               <p className="menu-desc">Explore our delicious food items and add them to your cart!</p>
+              
+              {/* Debug Info */}
+              {menuLoading && <p>Loading menu items...</p>}
+              {!menuLoading && <p>Found {menuItems.length} menu items</p>}
+              
               <div className="category-filters food-category-filters">
                 {foodCategories.map((cat) => (
                   <button
@@ -300,15 +327,29 @@ function App() {
                 {filteredFoodItems.map((item, idx) => (
                   <ScrollInCard
                     className="food-card"
-                    key={item.name + item.category}
+                    key={item._id || item.name + item.category}
                     delay={idx * 80}
                   >
-                    <img src={item.img} alt={item.name} className="food-img" />
+                    <img src={item.image || item.img} alt={item.name} className="food-img" />
                     <div className="food-info">
                       <h3 className="food-name">{item.name}</h3>
+                      {item.restaurant && (
+                        <p className="food-restaurant">From: {item.restaurant.name}</p>
+                      )}
                       <div className="food-meta">
                         <span className="food-price">₹{item.price}</span>
-                        <button className="add-cart-btn" onClick={() => handleAddToCart(item)}>Add to Cart</button>
+                        <button 
+                          className="add-cart-btn" 
+                          onClick={() => handleAddToCart({
+                            ...item,
+                            restaurantId: item.restaurant._id || item.restaurant,
+                            restaurant: item.restaurant,
+                            img: item.image || item.img,
+                            _id: item._id
+                          })}
+                        >
+                          Add to Cart
+                        </button>
                       </div>
                     </div>
                   </ScrollInCard>
@@ -390,6 +431,7 @@ function App() {
             <button className="modal-close" onClick={() => setModal(null)}>&times;</button>
             {modal === 'login' ? <LoginModal onSwitch={() => setModal('signup')} closeModal={() => setModal(null)} /> :
              modal === 'signup' ? <SignupModal onSwitch={() => setModal('login')} closeModal={() => setModal(null)} /> :
+             modal === 'checkout' ? <CheckoutModal closeModal={() => setModal(null)} /> :
              <PartnerModal thankYou={partnerThankYou} setThankYou={setPartnerThankYou} />}
           </div>
         </div>
@@ -400,39 +442,349 @@ function App() {
           <div className="cart-sidebar" onClick={e => e.stopPropagation()}>
             <button className="cart-sidebar-close" onClick={() => setCartOpen(false)}>&times;</button>
             <h2 className="cart-sidebar-title">Your Cart</h2>
+            
             {cartItems.length === 0 ? (
-              <div className="cart-sidebar-empty">Your cart is empty.</div>
+              <div className="cart-sidebar-empty">
+                <p>Your cart is empty.</p>
+                <p>Add some delicious items to get started!</p>
+              </div>
             ) : (
-              <div className="cart-sidebar-items">
-                {cartItems.map(item => (
-                  <div className="cart-sidebar-item" key={item.id}>
-                    <img src={item.img} alt={item.name} className="cart-sidebar-img" />
-                    <div className="cart-sidebar-info">
-                      <div className="cart-sidebar-name">{item.name}</div>
-                      <div className="cart-sidebar-meta">
-                        <span className="cart-sidebar-price">₹{item.price}</span>
-                        <span className="cart-sidebar-qty">
-                          <button onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}>-</button>
-                          {item.quantity}
-                          <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
-                        </span>
-                      </div>
-                    </div>
-                    <button className="cart-sidebar-remove" onClick={() => removeFromCart(item.id)} title="Remove">&times;</button>
+              <>
+                {/* Restaurant Info */}
+                {restaurant && (
+                  <div className="cart-restaurant-info">
+                    <h3 className="cart-restaurant-name">{restaurant.name}</h3>
+                    <p className="cart-restaurant-cuisine">{restaurant.cuisine}</p>
                   </div>
-                ))}
-              </div>
+                )}
+
+                {/* Cart Items */}
+                <div className="cart-sidebar-items">
+                  {cartItems.map(item => (
+                    <div className="cart-sidebar-item" key={item._id}>
+                      <img src={item.img || item.image} alt={item.name} className="cart-sidebar-img" />
+                      <div className="cart-sidebar-info">
+                        <div className="cart-sidebar-name">{item.name}</div>
+                        <div className="cart-sidebar-meta">
+                          <span className="cart-sidebar-price">₹{item.price}</span>
+                          <span className="cart-sidebar-qty">
+                            <button onClick={() => updateQuantity(item._id, Math.max(1, item.quantity - 1))}>-</button>
+                            {item.quantity}
+                            <button onClick={() => updateQuantity(item._id, item.quantity + 1)}>+</button>
+                          </span>
+                        </div>
+                      </div>
+                      <button className="cart-sidebar-remove" onClick={() => removeFromCart(item._id)} title="Remove">&times;</button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pricing Breakdown */}
+                <div className="cart-pricing-breakdown">
+                  {(() => {
+                    const pricing = getPricingBreakdown();
+                    return (
+                      <>
+                        <div className="pricing-row">
+                          <span>Subtotal:</span>
+                          <span>₹{pricing.subtotal}</span>
+                        </div>
+                        {pricing.deliveryFee > 0 && (
+                          <div className="pricing-row">
+                            <span>Delivery Fee:</span>
+                            <span>₹{pricing.deliveryFee}</span>
+                          </div>
+                        )}
+                        <div className="pricing-row">
+                          <span>Platform Fee:</span>
+                          <span>₹{pricing.platformFee}</span>
+                        </div>
+                        <div className="pricing-row">
+                          <span>Tax (5%):</span>
+                          <span>₹{pricing.tax}</span>
+                        </div>
+                        {pricing.subtotal > 300 && (
+                          <div className="pricing-row free-delivery">
+                            <span>🎉 Free Delivery!</span>
+                            <span>-₹40</span>
+                          </div>
+                        )}
+                        <div className="pricing-row total">
+                          <span>Total:</span>
+                          <span>₹{pricing.total}</span>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+
+                {/* Checkout Button */}
+                <div className="cart-sidebar-footer">
+                  {isAuthenticated ? (
+                    <button 
+                      className="cart-sidebar-checkout" 
+                      onClick={() => {
+                        setCartOpen(false);
+                        setModal('checkout');
+                      }}
+                      disabled={isCheckingOut}
+                    >
+                      {isCheckingOut ? 'Processing...' : 'Proceed to Checkout'}
+                    </button>
+                  ) : (
+                    <div className="cart-auth-required">
+                      <p>Please login to proceed with checkout</p>
+                      <button 
+                        className="cart-login-btn" 
+                        onClick={() => {
+                          setCartOpen(false);
+                          setModal('login');
+                        }}
+                      >
+                        Login
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
-            <div className="cart-sidebar-footer">
-              <div className="cart-sidebar-total-row">
-                <span>Total:</span>
-                <span className="cart-sidebar-total">₹{getCartTotal()}</span>
-              </div>
-              <button className="cart-sidebar-checkout">Checkout</button>
-            </div>
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// Checkout Modal Component
+function CheckoutModal({ closeModal }) {
+  const { checkout, getPricingBreakdown, cartItems, restaurant, isCheckingOut } = useCart();
+  const { user } = useAuth();
+  const [formData, setFormData] = useState({
+    name: user?.name || '',
+    phone: user?.phone || '',
+    street: '',
+    city: 'Mumbai',
+    state: 'Maharashtra',
+    zipCode: '',
+    landmark: '',
+    paymentMethod: 'cod',
+    specialInstructions: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const pricing = getPricingBreakdown();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      // Validate required fields
+      if (!formData.name || !formData.phone || !formData.street || !formData.zipCode) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      const deliveryAddress = {
+        name: formData.name,
+        phone: formData.phone,
+        street: formData.street,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        landmark: formData.landmark
+      };
+
+      const result = await checkout(deliveryAddress, formData.paymentMethod, formData.specialInstructions);
+      
+      if (result.success) {
+        alert('Order placed successfully! Order ID: ' + result.order.orderNumber);
+        closeModal();
+        // Optionally redirect to order tracking page
+      }
+
+    } catch (error) {
+      console.error('Checkout error:', error);
+      setError(error.message || 'Failed to place order');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="checkout-modal">
+      <h2 className="checkout-title">Checkout</h2>
+      
+      {/* Order Summary */}
+      <div className="checkout-order-summary">
+        <h3>Order Summary</h3>
+        <div className="checkout-restaurant">
+          <strong>{restaurant?.name}</strong>
+          <span className="checkout-restaurant-cuisine">{restaurant?.cuisine}</span>
+        </div>
+        
+        <div className="checkout-items">
+          {cartItems.map(item => (
+            <div key={item._id} className="checkout-item">
+              <span className="checkout-item-name">{item.name} x {item.quantity}</span>
+              <span className="checkout-item-price">₹{item.price * item.quantity}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="checkout-pricing">
+          <div className="pricing-row">
+            <span>Subtotal:</span>
+            <span>₹{pricing.subtotal}</span>
+          </div>
+          {pricing.deliveryFee > 0 && (
+            <div className="pricing-row">
+              <span>Delivery Fee:</span>
+              <span>₹{pricing.deliveryFee}</span>
+            </div>
+          )}
+          <div className="pricing-row">
+            <span>Platform Fee:</span>
+            <span>₹{pricing.platformFee}</span>
+          </div>
+          <div className="pricing-row">
+            <span>Tax (5%):</span>
+            <span>₹{pricing.tax}</span>
+          </div>
+          <div className="pricing-row total">
+            <span><strong>Total:</strong></span>
+            <span><strong>₹{pricing.total}</strong></span>
+          </div>
+        </div>
+      </div>
+
+      {/* Delivery Address Form */}
+      <form className="checkout-form" onSubmit={handleSubmit}>
+        <h3>Delivery Address</h3>
+        <div className="checkout-form-row">
+          <input
+            type="text"
+            name="name"
+            placeholder="Full Name *"
+            value={formData.name}
+            onChange={handleChange}
+            className="checkout-input"
+            required
+          />
+          <input
+            type="tel"
+            name="phone"
+            placeholder="Phone Number *"
+            value={formData.phone}
+            onChange={handleChange}
+            className="checkout-input"
+            required
+          />
+        </div>
+        
+        <input
+          type="text"
+          name="street"
+          placeholder="Street Address *"
+          value={formData.street}
+          onChange={handleChange}
+          className="checkout-input"
+          required
+        />
+        
+        <div className="checkout-form-row">
+          <input
+            type="text"
+            name="city"
+            placeholder="City *"
+            value={formData.city}
+            onChange={handleChange}
+            className="checkout-input"
+            required
+          />
+          <input
+            type="text"
+            name="zipCode"
+            placeholder="ZIP Code *"
+            value={formData.zipCode}
+            onChange={handleChange}
+            className="checkout-input"
+            required
+          />
+        </div>
+        
+        <input
+          type="text"
+          name="landmark"
+          placeholder="Landmark (Optional)"
+          value={formData.landmark}
+          onChange={handleChange}
+          className="checkout-input"
+        />
+
+        <h3>Payment Method</h3>
+        <div className="checkout-payment-methods">
+          <label className="checkout-payment-option">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="cod"
+              checked={formData.paymentMethod === 'cod'}
+              onChange={handleChange}
+            />
+            <span>Cash on Delivery</span>
+          </label>
+          <label className="checkout-payment-option">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="card"
+              checked={formData.paymentMethod === 'card'}
+              onChange={handleChange}
+            />
+            <span>Credit/Debit Card</span>
+          </label>
+          <label className="checkout-payment-option">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="upi"
+              checked={formData.paymentMethod === 'upi'}
+              onChange={handleChange}
+            />
+            <span>UPI</span>
+          </label>
+        </div>
+
+        <h3>Special Instructions</h3>
+        <textarea
+          name="specialInstructions"
+          placeholder="Any special instructions for the restaurant or delivery partner..."
+          value={formData.specialInstructions}
+          onChange={handleChange}
+          className="checkout-textarea"
+          rows="3"
+        />
+
+        {error && <div className="checkout-error">{error}</div>}
+
+        <button 
+          type="submit" 
+          className="checkout-place-order-btn"
+          disabled={loading || isCheckingOut}
+        >
+          {loading || isCheckingOut ? 'Placing Order...' : `Place Order - ₹${pricing.total}`}
+        </button>
+      </form>
     </div>
   );
 }

@@ -17,9 +17,14 @@ class ApiService {
       ...options,
     };
 
+    console.log('API Request:', { url, config, body: options.body });
+
     try {
       const response = await fetch(url, config);
+      console.log('API Response:', response);
+      
       const data = await response.json();
+      console.log('API Response Data:', data);
       
       if (!response.ok) {
         throw new Error(data.message || 'Something went wrong');
@@ -30,6 +35,53 @@ class ApiService {
       console.error('API Error:', error);
       throw error;
     }
+  }
+
+  // HTTP method helpers
+  get(endpoint, options = {}) {
+    const { params, ...otherOptions } = options;
+    let url = endpoint;
+    
+    if (params) {
+      const queryString = new URLSearchParams(params).toString();
+      url += `?${queryString}`;
+    }
+    
+    return this.request(url, {
+      method: 'GET',
+      ...otherOptions
+    });
+  }
+
+  post(endpoint, data, options = {}) {
+    return this.request(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      ...options
+    });
+  }
+
+  put(endpoint, data, options = {}) {
+    return this.request(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      ...options
+    });
+  }
+
+  patch(endpoint, data, options = {}) {
+    return this.request(endpoint, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+      ...options
+    });
+  }
+
+  delete(endpoint, options = {}) {
+    return this.request(endpoint, {
+      method: 'DELETE',
+      ...options
+    });
   }
 
   // Authentication endpoints
@@ -153,4 +205,6 @@ class ApiService {
   };
 }
 
-export default new ApiService();
+const api = new ApiService();
+export { api };
+export default api;

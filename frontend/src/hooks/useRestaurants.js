@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import apiService from '../services/api';
+import { api } from '../services/api';
 
 export const useRestaurants = () => {
   const [restaurants, setRestaurants] = useState([]);
@@ -10,7 +10,9 @@ export const useRestaurants = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiService.restaurants.getAll(filters);
+      console.log('Fetching restaurants...');
+      const data = await api.get('/restaurants', { params: filters });
+      console.log('Restaurants response:', data);
       setRestaurants(data.restaurants || []);
     } catch (err) {
       setError(err.message);
@@ -28,7 +30,7 @@ export const useRestaurants = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiService.restaurants.search(query);
+      const data = await api.get('/restaurants', { params: { search: query } });
       setRestaurants(data.restaurants || []);
     } catch (err) {
       setError(err.message);
@@ -63,8 +65,8 @@ export const useRestaurant = (restaurantId) => {
         setError(null);
         
         const [restaurantData, menuData] = await Promise.all([
-          apiService.restaurants.getById(restaurantId),
-          apiService.menu.getByRestaurant(restaurantId)
+          api.get(`/restaurants/${restaurantId}`),
+          api.get(`/menu/restaurant/${restaurantId}`)
         ]);
         
         setRestaurant(restaurantData.restaurant);
