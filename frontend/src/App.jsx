@@ -1,6 +1,9 @@
 import './App.css';
 import { useState, useRef, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext.jsx';
+import { useCart } from './contexts/CartContext.jsx';
+import { useRestaurants } from './hooks/useRestaurants.js';
 
 // ScrollInCard component for animation
 function ScrollInCard({ children, delay = 0, className = '', ...props }) {
@@ -102,22 +105,21 @@ function OrdersPage() {
 }
 
 function App() {
-  // Simulate cart count for badge
-  // Restaurant data
-  const restaurantData = [
-    { name: 'Burger Palace', cuisine: 'Fast Food', rating: 4.7, img: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=400&q=80', tag: 'Top Rated' },
-    { name: 'Spice Villa', cuisine: 'Indian', rating: 4.8, img: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80' },
-    { name: 'Dragon Express', cuisine: 'Chinese', rating: 4.6, img: 'https://images.unsplash.com/photo-1464306076886-debca5e8a6b0?auto=format&fit=crop&w=400&q=80' },
-    { name: 'Pasta House', cuisine: 'Italian', rating: 4.5, img: 'https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80' },
-    { name: 'Campus Café', cuisine: 'Cafe', rating: 4.4, img: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80' },
-  ];
+  // Authentication and cart state
+  const { user, isAuthenticated, loading: authLoading, logout } = useAuth();
+  const { cartItems, getCartCount, addToCart, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
+  
+  // Dynamic restaurant data
+  const { restaurants: restaurantData, loading: restaurantsLoading } = useRestaurants();
+  
+  // Static data (will be replaced with dynamic data later)
   const restaurantCategories = ['All', 'Indian', 'Chinese', 'Italian', 'Fast Food'];
   const [selectedRestaurantCategory, setSelectedRestaurantCategory] = useState('All');
   const filteredRestaurants = selectedRestaurantCategory === 'All'
     ? restaurantData
     : restaurantData.filter(r => r.cuisine === selectedRestaurantCategory);
 
-  // Food items for the menu
+  // Food items for the menu (will be fetched dynamically later)
   const foodItems = [
     { name: 'Classic Cheeseburger', price: 129, img: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=400&q=80', category: 'Burgers' },
     { name: 'Paneer Tikka', price: 99, img: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80', category: 'Biryani' },
@@ -139,7 +141,6 @@ function App() {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
   const [modal, setModal] = useState(null); // 'login' | 'signup' | 'partner' | null
   const [cartOpen, setCartOpen] = useState(false);
-  const [cart, setCart] = useState([]); // [{name, price, img, qty}]
   const [partnerThankYou, setPartnerThankYou] = useState(false);
   const navigate = useNavigate();
   const [scrollTarget, setScrollTarget] = useState(null);
@@ -186,31 +187,8 @@ function App() {
 
   // Add to Cart handler
   function handleAddToCart(item) {
-    setCart(prev => {
-      const idx = prev.findIndex(f => f.name === item.name && f.price === item.price);
-      if (idx !== -1) {
-        // Increase quantity
-        const updated = [...prev];
-        updated[idx].qty += 1;
-        return updated;
-      }
-      return [...prev, { ...item, qty: 1 }];
-    });
+    addToCart(item, 1);
   }
-
-  // Remove from Cart handler
-  function handleRemoveFromCart(name, price) {
-    setCart(prev => prev.filter(f => !(f.name === name && f.price === price)));
-  }
-
-  // Update quantity
-  function handleUpdateQty(name, price, qty) {
-    setCart(prev => prev.map(f => (f.name === name && f.price === price ? { ...f, qty } : f)));
-  }
-
-  // Cart total
-  const cartTotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
 
   return (
     <div className={`app-container${modal ? ' modal-open' : ''}`}>
@@ -229,10 +207,20 @@ function App() {
         <div className="header-actions">
           <button className="cart-btn" title="Cart" onClick={() => setCartOpen(true)}>
             <span role="img" aria-label="cart">🛒</span>
-            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+            {getCartCount() > 0 && <span className="cart-badge">{getCartCount()}</span>}
           </button>
-          <button className="login-btn" onClick={() => setModal('login')}>Login</button>
-          <button className="signup-btn" onClick={() => setModal('signup')}>Sign Up</button>
+          
+          {isAuthenticated ? (
+            <div className="user-menu">
+              <span className="user-greeting">Hi, {user?.name || 'User'}!</span>
+              <button className="logout-btn" onClick={logout}>Logout</button>
+            </div>
+          ) : (
+            <>
+              <button className="login-btn" onClick={() => setModal('login')}>Login</button>
+              <button className="signup-btn" onClick={() => setModal('signup')}>Sign Up</button>
+            </>
+          )}
         </div>
       </header>
       {/* Main page content (always visible) */}
@@ -400,8 +388,8 @@ function App() {
         <div className="modal-overlay" onClick={() => setModal(null)}>
           <div className="modal-card" onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setModal(null)}>&times;</button>
-            {modal === 'login' ? <LoginModal onSwitch={() => setModal('signup')} /> :
-             modal === 'signup' ? <SignupModal onSwitch={() => setModal('login')} /> :
+            {modal === 'login' ? <LoginModal onSwitch={() => setModal('signup')} closeModal={() => setModal(null)} /> :
+             modal === 'signup' ? <SignupModal onSwitch={() => setModal('login')} closeModal={() => setModal(null)} /> :
              <PartnerModal thankYou={partnerThankYou} setThankYou={setPartnerThankYou} />}
           </div>
         </div>
@@ -412,25 +400,25 @@ function App() {
           <div className="cart-sidebar" onClick={e => e.stopPropagation()}>
             <button className="cart-sidebar-close" onClick={() => setCartOpen(false)}>&times;</button>
             <h2 className="cart-sidebar-title">Your Cart</h2>
-            {cart.length === 0 ? (
+            {cartItems.length === 0 ? (
               <div className="cart-sidebar-empty">Your cart is empty.</div>
             ) : (
               <div className="cart-sidebar-items">
-                {cart.map(item => (
-                  <div className="cart-sidebar-item" key={item.name + item.price}>
+                {cartItems.map(item => (
+                  <div className="cart-sidebar-item" key={item.id}>
                     <img src={item.img} alt={item.name} className="cart-sidebar-img" />
                     <div className="cart-sidebar-info">
                       <div className="cart-sidebar-name">{item.name}</div>
                       <div className="cart-sidebar-meta">
                         <span className="cart-sidebar-price">₹{item.price}</span>
                         <span className="cart-sidebar-qty">
-                          <button onClick={() => handleUpdateQty(item.name, item.price, Math.max(1, item.qty - 1))}>-</button>
-                          {item.qty}
-                          <button onClick={() => handleUpdateQty(item.name, item.price, item.qty + 1)}>+</button>
+                          <button onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}>-</button>
+                          {item.quantity}
+                          <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
                         </span>
                       </div>
                     </div>
-                    <button className="cart-sidebar-remove" onClick={() => handleRemoveFromCart(item.name, item.price)} title="Remove">&times;</button>
+                    <button className="cart-sidebar-remove" onClick={() => removeFromCart(item.id)} title="Remove">&times;</button>
                   </div>
                 ))}
               </div>
@@ -438,7 +426,7 @@ function App() {
             <div className="cart-sidebar-footer">
               <div className="cart-sidebar-total-row">
                 <span>Total:</span>
-                <span className="cart-sidebar-total">₹{cartTotal}</span>
+                <span className="cart-sidebar-total">₹{getCartTotal()}</span>
               </div>
               <button className="cart-sidebar-checkout">Checkout</button>
             </div>
@@ -450,7 +438,8 @@ function App() {
 }
 
 // Modal versions of Login/Signup
-function LoginModal({ onSwitch }) {
+function LoginModal({ onSwitch, closeModal }) {
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -473,31 +462,17 @@ function LoginModal({ onSwitch }) {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Store token and user data
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        alert(`Welcome back, ${data.user.name}!`);
-        window.location.reload(); // Refresh to update UI
+      const result = await login(formData.email, formData.password);
+      
+      if (result.success) {
+        alert(`Welcome back, ${result.user.name}!`);
+        closeModal(); // Close modal
       } else {
-        setError(data.message || 'Login failed');
+        setError(result.message || 'Login failed');
       }
     } catch (error) {
       console.error('Login error:', error);
-      setError('Network error. Please check if the backend server is running.');
+      setError('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -544,7 +519,8 @@ function LoginModal({ onSwitch }) {
     </div>
   );
 }
-function SignupModal({ onSwitch }) {
+function SignupModal({ onSwitch, closeModal }) {
+  const { register } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [formData, setFormData] = useState({
@@ -586,32 +562,27 @@ function SignupModal({ onSwitch }) {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          role: formData.role,
-          phone: formData.phone,
-          collegeId: formData.collegeId
-        }),
+      const result = await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+        phone: formData.phone,
+        collegeId: formData.collegeId
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        alert('Registration successful! You can now login.');
-        onSwitch(); // Switch to login modal
+      if (result.success) {
+        alert(`Welcome to UniEats, ${result.user.name}!`);
+        closeModal(); // Close modal
       } else {
-        setError(data.message || 'Registration failed');
+        setError(result.message || 'Registration failed');
+        if (result.errors) {
+          setError(result.errors.join(', '));
+        }
       }
     } catch (error) {
       console.error('Registration error:', error);
-      setError('Network error. Please check if the backend server is running.');
+      setError('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
