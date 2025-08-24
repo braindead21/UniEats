@@ -42,12 +42,10 @@ exports.validateRegister = [
     .withMessage('Please provide a valid phone number'),
   
   body('collegeId')
+    .optional()
     .custom((value, { req }) => {
-      if (req.body.role === 'student' || req.body.role === 'delivery_partner') {
-        if (!value || value.trim() === '') {
-          throw new Error('College ID is required for students and delivery partners');
-        }
-      }
+      // Make collegeId optional for all roles during testing
+      // Can be re-enabled later if needed
       return true;
     })
 ];

@@ -12,6 +12,14 @@ const StudentDashboard = () => {
 
   useEffect(() => {
     fetchStudentData();
+    
+    // Set up real-time refresh every 60 seconds for student dashboard
+    const interval = setInterval(() => {
+      fetchStudentData();
+    }, 60000);
+    
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
   }, []);
 
   const fetchStudentData = async () => {

@@ -13,6 +13,14 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
+    
+    // Set up real-time refresh every 45 seconds for admin dashboard
+    const interval = setInterval(() => {
+      fetchDashboardData();
+    }, 45000);
+    
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
   }, []);
 
   const fetchDashboardData = async () => {

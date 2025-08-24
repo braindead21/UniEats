@@ -8,106 +8,68 @@ const router = express.Router();
 // All routes require authentication and delivery partner role
 router.use(protect, requireDeliveryPartner);
 
-// @desc    Get delivery partner dashboard
-// @route   GET /api/delivery-partner/dashboard
+// @desc    Get delivery partner stats
+// @route   GET /api/deliveryPartner/stats
 // @access  Private (Delivery Partner)
-router.get('/dashboard', async (req, res) => {
+router.get('/stats', async (req, res) => {
   try {
     const partnerId = req.user._id;
     
-    // Get today's deliveries
+    // Get today's date range
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     
-    const todayDeliveries = await Order.find({
+    // Get all deliveries for this partner
+    const allDeliveries = await Order.find({
       deliveryPartner: partnerId,
-      createdAt: { $gte: today, $lt: tomorrow }
-    }).populate('restaurant', 'name');
-    
-    // Get current deliveries (assigned but not delivered)
-    const currentDeliveries = await Order.find({
-      deliveryPartner: partnerId,
-      status: { $in: ['out_for_delivery', 'ready_for_pickup'] }
-    }).populate('restaurant', 'name');
-    
-    // Calculate today's earnings
-    const todayEarnings = todayDeliveries
-      .filter(order => order.status === 'delivered')
-      .reduce((sum, order) => sum + (order.deliveryFee || 40), 0);
-    
-    // Get monthly stats
-    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-    const monthlyDeliveries = await Order.find({
-      deliveryPartner: partnerId,
-      createdAt: { $gte: monthStart },
       status: 'delivered'
     });
     
-    const monthlyEarnings = monthlyDeliveries.reduce((sum, order) => sum + (order.deliveryFee || 40), 0);
+    // Get today's deliveries
+    const todayDeliveries = await Order.find({
+      deliveryPartner: partnerId,
+      status: 'delivered',
+      'tracking.delivered': { $gte: today, $lt: tomorrow }
+    });
+    
+    // Calculate earnings
+    const totalEarnings = allDeliveries.reduce((sum, order) => sum + (order.deliveryFee || 40), 0);
+    const todayEarnings = todayDeliveries.reduce((sum, order) => sum + (order.deliveryFee || 40), 0);
+    
+    // Calculate rating (dummy for now)
+    const currentRating = 4.5; // This would be calculated from actual ratings
     
     res.status(200).json({
       success: true,
-      data: {
-        partnerInfo: req.user.deliveryPartnerInfo,
-        stats: {
-          todayDeliveries: todayDeliveries.filter(o => o.status === 'delivered').length,
-          currentDeliveries: currentDeliveries.length,
-          todayEarnings,
-          monthlyDeliveries: monthlyDeliveries.length,
-          monthlyEarnings,
-          isAvailable: req.user.deliveryPartnerInfo.isAvailable
-        },
-        currentOrders: currentDeliveries
+      stats: {
+        totalDeliveries: allDeliveries.length,
+        todayDeliveries: todayDeliveries.length,
+        totalEarnings,
+        todayEarnings,
+        currentRating,
+        completedOrders: allDeliveries.length
       }
     });
   } catch (error) {
-    console.error('Delivery partner dashboard error:', error);
+    console.error('Delivery partner stats error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error fetching dashboard data'
-    });
-  }
-});
-
-// @desc    Toggle availability status
-// @route   PUT /api/delivery-partner/availability
-// @access  Private (Delivery Partner)
-router.put('/availability', async (req, res) => {
-  try {
-    const { isAvailable } = req.body;
-    
-    await User.findByIdAndUpdate(req.user._id, {
-      'deliveryPartnerInfo.isAvailable': isAvailable
-    });
-    
-    res.status(200).json({
-      success: true,
-      message: `Status updated to ${isAvailable ? 'available' : 'unavailable'}`,
-      isAvailable
-    });
-  } catch (error) {
-    console.error('Availability update error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error updating availability'
+      message: 'Server error fetching stats'
     });
   }
 });
 
 // @desc    Get available orders for delivery
-// @route   GET /api/delivery-partner/available-orders
+// @route   GET /api/deliveryPartner/available-orders
 // @access  Private (Delivery Partner)
 router.get('/available-orders', async (req, res) => {
   try {
-    const partnerZones = req.user.deliveryPartnerInfo.deliveryZones;
-    
-    // Find orders that are ready for pickup and in partner's zones
+    // Find orders that are ready for pickup and not assigned
     const availableOrders = await Order.find({
       status: 'ready_for_pickup',
-      deliveryPartner: null,
-      // Add zone filtering logic here based on delivery address
+      deliveryPartner: null
     })
     .populate('restaurant', 'name address')
     .populate('user', 'name phone')
@@ -115,8 +77,7 @@ router.get('/available-orders', async (req, res) => {
     
     res.status(200).json({
       success: true,
-      count: availableOrders.length,
-      data: availableOrders
+      orders: availableOrders
     });
   } catch (error) {
     console.error('Available orders fetch error:', error);
@@ -127,8 +88,95 @@ router.get('/available-orders', async (req, res) => {
   }
 });
 
+// @desc    Get my deliveries
+// @route   GET /api/deliveryPartner/my-deliveries
+// @access  Private (Delivery Partner)
+router.get('/my-deliveries', async (req, res) => {
+  try {
+    const partnerId = req.user._id;
+    
+    const myDeliveries = await Order.find({
+      deliveryPartner: partnerId,
+      status: { $in: ['picked_up', 'out_for_delivery', 'delivered'] }
+    })
+    .populate('restaurant', 'name address')
+    .populate('user', 'name phone')
+    .sort({ createdAt: -1 });
+    
+    res.status(200).json({
+      success: true,
+      deliveries: myDeliveries
+    });
+  } catch (error) {
+    console.error('My deliveries fetch error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching deliveries'
+    });
+  }
+});
+
+// @desc    Get earnings history
+// @route   GET /api/deliveryPartner/earnings
+// @access  Private (Delivery Partner)
+router.get('/earnings', async (req, res) => {
+  try {
+    const partnerId = req.user._id;
+    
+    const deliveredOrders = await Order.find({
+      deliveryPartner: partnerId,
+      status: 'delivered'
+    })
+    .sort({ 'tracking.delivered': -1 })
+    .limit(20);
+    
+    const earnings = deliveredOrders.map(order => ({
+      _id: order._id,
+      orderNumber: order.orderNumber,
+      amount: order.deliveryFee || 40,
+      date: order.tracking.delivered || order.createdAt
+    }));
+    
+    res.status(200).json({
+      success: true,
+      earnings
+    });
+  } catch (error) {
+    console.error('Earnings fetch error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching earnings'
+    });
+  }
+});
+
+// @desc    Toggle online status
+// @route   POST /api/deliveryPartner/toggle-online
+// @access  Private (Delivery Partner)
+router.post('/toggle-online', async (req, res) => {
+  try {
+    const { isOnline } = req.body;
+    const partnerId = req.user._id;
+    
+    await User.findByIdAndUpdate(partnerId, {
+      'deliveryPartnerInfo.isAvailable': isOnline
+    });
+    
+    res.status(200).json({
+      success: true,
+      message: `Status updated to ${isOnline ? 'online' : 'offline'}`
+    });
+  } catch (error) {
+    console.error('Online status toggle error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error updating status'
+    });
+  }
+});
+
 // @desc    Accept delivery order
-// @route   POST /api/delivery-partner/accept-order/:orderId
+// @route   POST /api/deliveryPartner/accept-order/:orderId
 // @access  Private (Delivery Partner)
 router.post('/accept-order/:orderId', async (req, res) => {
   try {
@@ -160,21 +208,17 @@ router.post('/accept-order/:orderId', async (req, res) => {
     
     // Assign order to delivery partner
     order.deliveryPartner = partnerId;
-    order.status = 'out_for_delivery';
+    order.status = 'picked_up';
+    if (!order.tracking) {
+      order.tracking = {};
+    }
     order.tracking.pickedUp = new Date();
-    order.statusHistory.push({
-      status: 'out_for_delivery',
-      note: 'Order picked up by delivery partner',
-      updatedBy: partnerId,
-      timestamp: new Date()
-    });
     
     await order.save();
     
     res.status(200).json({
       success: true,
-      message: 'Order accepted successfully',
-      data: order
+      message: 'Order accepted successfully'
     });
   } catch (error) {
     console.error('Order acceptance error:', error);
@@ -185,14 +229,14 @@ router.post('/accept-order/:orderId', async (req, res) => {
   }
 });
 
-// @desc    Mark order as delivered
-// @route   PUT /api/delivery-partner/complete-delivery/:orderId
+// @desc    Update delivery status
+// @route   PUT /api/deliveryPartner/update-delivery/:orderId
 // @access  Private (Delivery Partner)
-router.put('/complete-delivery/:orderId', async (req, res) => {
+router.put('/update-delivery/:orderId', async (req, res) => {
   try {
     const { orderId } = req.params;
+    const { status } = req.body;
     const partnerId = req.user._id;
-    const { deliveryNote } = req.body;
     
     const order = await Order.findOne({
       _id: orderId,
@@ -206,112 +250,35 @@ router.put('/complete-delivery/:orderId', async (req, res) => {
       });
     }
     
-    if (order.status !== 'out_for_delivery') {
-      return res.status(400).json({
-        success: false,
-        message: 'Order is not out for delivery'
-      });
+    // Update order status
+    order.status = status;
+    if (!order.tracking) {
+      order.tracking = {};
     }
     
-    // Mark as delivered
-    order.status = 'delivered';
-    order.tracking.delivered = new Date();
-    order.statusHistory.push({
-      status: 'delivered',
-      note: deliveryNote || 'Order delivered successfully',
-      updatedBy: partnerId,
-      timestamp: new Date()
-    });
+    switch (status) {
+      case 'picked_up':
+        order.tracking.pickedUp = new Date();
+        break;
+      case 'out_for_delivery':
+        order.tracking.outForDelivery = new Date();
+        break;
+      case 'delivered':
+        order.tracking.delivered = new Date();
+        break;
+    }
     
     await order.save();
     
-    // Update delivery partner stats
-    await User.findByIdAndUpdate(partnerId, {
-      $inc: {
-        'deliveryPartnerInfo.totalDeliveries': 1,
-        'deliveryPartnerInfo.earnings.total': order.pricing.deliveryFee || 40,
-        'deliveryPartnerInfo.earnings.thisMonth': order.pricing.deliveryFee || 40
-      }
-    });
-    
     res.status(200).json({
       success: true,
-      message: 'Order marked as delivered',
-      data: order
+      message: 'Delivery status updated successfully'
     });
   } catch (error) {
-    console.error('Delivery completion error:', error);
+    console.error('Delivery status update error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error completing delivery'
-    });
-  }
-});
-
-// @desc    Get delivery history
-// @route   GET /api/delivery-partner/history
-// @access  Private (Delivery Partner)
-router.get('/history', async (req, res) => {
-  try {
-    const partnerId = req.user._id;
-    const { page = 1, limit = 20 } = req.query;
-    
-    const deliveries = await Order.find({
-      deliveryPartner: partnerId
-    })
-    .populate('restaurant', 'name')
-    .populate('user', 'name phone')
-    .sort({ createdAt: -1 })
-    .limit(limit * 1)
-    .skip((page - 1) * limit);
-    
-    const total = await Order.countDocuments({
-      deliveryPartner: partnerId
-    });
-    
-    res.status(200).json({
-      success: true,
-      count: deliveries.length,
-      total,
-      pagination: {
-        page: parseInt(page),
-        pages: Math.ceil(total / limit)
-      },
-      data: deliveries
-    });
-  } catch (error) {
-    console.error('Delivery history error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error fetching delivery history'
-    });
-  }
-});
-
-// @desc    Update current location
-// @route   PUT /api/delivery-partner/location
-// @access  Private (Delivery Partner)
-router.put('/location', async (req, res) => {
-  try {
-    const { latitude, longitude } = req.body;
-    const partnerId = req.user._id;
-    
-    await User.findByIdAndUpdate(partnerId, {
-      'deliveryPartnerInfo.currentLocation': {
-        type: 'Point',
-        coordinates: [longitude, latitude]
-      }
-    });
-    
-    res.status(200).json({
-      success: true,
-      message: 'Location updated successfully'
-    });
-  } catch (error) {
-    console.error('Location update error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error updating location'
+      message: 'Server error updating delivery status'
     });
   }
 });

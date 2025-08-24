@@ -10,6 +10,7 @@ import { api } from './services/api.js';
 import AdminDashboard from './components/AdminDashboard.jsx';
 import StudentDashboard from './components/StudentDashboard.jsx';
 import RestaurantOwnerDashboard from './components/RestaurantOwnerDashboard.jsx';
+import DeliveryPartnerDashboard from './components/DeliveryPartnerDashboard.jsx';
 
 // Import all new authentication components
 import AdminLogin from './components/AdminLogin.jsx';
@@ -431,7 +432,7 @@ function App() {
           isAuthenticated ? (
             user?.role === 'admin' ? <AdminDashboard /> :
             user?.role === 'restaurant_owner' ? <RestaurantOwnerDashboard /> :
-            user?.role === 'delivery_partner' ? <div style={{padding: '100px 20px', textAlign: 'center'}}><h2>🏍️ Delivery Partner Dashboard</h2><p>Coming Soon!</p></div> :
+            user?.role === 'delivery_partner' ? <DeliveryPartnerDashboard /> :
             <StudentDashboard />
           ) : (
             <div style={{padding: '100px 20px', textAlign: 'center'}}>
@@ -491,10 +492,7 @@ function App() {
         
         <Route path="/delivery/dashboard" element={
           isAuthenticated && user?.role === 'delivery_partner' ? (
-            <div style={{padding: '100px 20px', textAlign: 'center'}}>
-              <h2>🏍️ Delivery Partner Dashboard</h2>
-              <p>Coming Soon!</p>
-            </div>
+            <DeliveryPartnerDashboard />
           ) : (
             <div style={{padding: '100px 20px', textAlign: 'center'}}>
               <h2>🏍️ Delivery Partner Access Required</h2>
@@ -520,7 +518,9 @@ function App() {
                 <div className="hero-buttons hero-search-bar">
                   <input className="search-food-input" type="text" placeholder="Search for food..." />
                   <button className="search-food-btn">Search</button>
-                  <button className="partner-btn" onClick={() => { setModal('partner'); setPartnerThankYou(false); }}>🏍️ Become a Delivery Partner</button>
+                  {!isAuthenticated && (
+                    <button className="partner-btn" onClick={() => { setModal('partner'); setPartnerThankYou(false); }}>🏍️ Become a Delivery Partner</button>
+                  )}
                 </div>
               </div>
             </section>

@@ -9,64 +9,69 @@ const router = express.Router();
 // All routes require authentication and restaurant owner role
 router.use(protect, requireRestaurantOwner);
 
-// @desc    Get restaurant owner dashboard data
-// @route   GET /api/restaurant-owner/dashboard
+// @desc    Get restaurant owner dashboard stats
+// @route   GET /api/restaurant-owner/stats
 // @access  Private (Restaurant Owner)
-router.get('/dashboard', async (req, res) => {
+router.get('/stats', async (req, res) => {
   try {
-    const restaurantId = req.user.restaurantInfo.restaurantId;
+    const restaurantId = req.user.restaurantInfo?.restaurantId;
     
-    // Get restaurant info
-    const restaurant = await Restaurant.findById(restaurantId);
-    
-    // Get today's orders
+    if (!restaurantId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Restaurant ID not found in user profile'
+      });
+    }
+
+    // Get today's date range
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     
+    // Get all orders for this restaurant
+    const allOrders = await Order.find({ restaurant: restaurantId });
+    
+    // Get today's orders
     const todayOrders = await Order.find({
       restaurant: restaurantId,
       createdAt: { $gte: today, $lt: tomorrow }
-    }).populate('items.menuItem', 'name');
+    });
     
     // Get pending orders
     const pendingOrders = await Order.find({
       restaurant: restaurantId,
       status: 'pending'
-    }).populate('items.menuItem', 'name');
-    
-    // Calculate today's revenue
-    const todayRevenue = todayOrders.reduce((sum, order) => sum + order.pricing.total, 0);
-    
-    // Get monthly stats
-    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-    const monthlyOrders = await Order.find({
-      restaurant: restaurantId,
-      createdAt: { $gte: monthStart }
     });
     
-    const monthlyRevenue = monthlyOrders.reduce((sum, order) => sum + order.pricing.total, 0);
+    // Calculate revenue
+    const totalRevenue = allOrders
+      .filter(order => order.status === 'delivered')
+      .reduce((sum, order) => sum + (order.pricing?.total || 0), 0);
+      
+    const todayRevenue = todayOrders
+      .filter(order => order.status === 'delivered')
+      .reduce((sum, order) => sum + (order.pricing?.total || 0), 0);
+    
+    // Calculate average rating (dummy for now)
+    const averageRating = 4.3;
     
     res.status(200).json({
       success: true,
-      data: {
-        restaurant,
-        stats: {
-          todayOrders: todayOrders.length,
-          pendingOrders: pendingOrders.length,
-          todayRevenue,
-          monthlyOrders: monthlyOrders.length,
-          monthlyRevenue
-        },
-        recentOrders: todayOrders.slice(-10) // Last 10 orders
+      stats: {
+        totalOrders: allOrders.length,
+        todayOrders: todayOrders.length,
+        totalRevenue,
+        todayRevenue,
+        averageRating,
+        pendingOrders: pendingOrders.length
       }
     });
   } catch (error) {
-    console.error('Dashboard error:', error);
+    console.error('Restaurant stats error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error fetching dashboard data'
+      message: 'Server error fetching restaurant stats'
     });
   }
 });
@@ -76,7 +81,15 @@ router.get('/dashboard', async (req, res) => {
 // @access  Private (Restaurant Owner)
 router.get('/orders', async (req, res) => {
   try {
-    const restaurantId = req.user.restaurantInfo.restaurantId;
+    const restaurantId = req.user.restaurantInfo?.restaurantId;
+    
+    if (!restaurantId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Restaurant ID not found in user profile'
+      });
+    }
+    
     const { status, page = 1, limit = 20 } = req.query;
     
     const query = { restaurant: restaurantId };
@@ -85,7 +98,6 @@ router.get('/orders', async (req, res) => {
     }
     
     const orders = await Order.find(query)
-      .populate('items.menuItem', 'name price')
       .populate('user', 'name phone')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
@@ -97,11 +109,11 @@ router.get('/orders', async (req, res) => {
       success: true,
       count: orders.length,
       total,
+      orders: orders,
       pagination: {
         page: parseInt(page),
         pages: Math.ceil(total / limit)
-      },
-      data: orders
+      }
     });
   } catch (error) {
     console.error('Orders fetch error:', error);
@@ -170,7 +182,14 @@ router.put('/orders/:orderId/status', async (req, res) => {
 // @access  Private (Restaurant Owner)
 router.get('/menu', async (req, res) => {
   try {
-    const restaurantId = req.user.restaurantInfo.restaurantId;
+    const restaurantId = req.user.restaurantInfo?.restaurantId;
+    
+    if (!restaurantId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Restaurant ID not found in user profile'
+      });
+    }
     
     const menuItems = await MenuItem.find({ restaurant: restaurantId })
       .sort({ category: 1, name: 1 });
@@ -178,7 +197,7 @@ router.get('/menu', async (req, res) => {
     res.status(200).json({
       success: true,
       count: menuItems.length,
-      data: menuItems
+      menu: menuItems
     });
   } catch (error) {
     console.error('Menu fetch error:', error);
@@ -196,7 +215,14 @@ router.put('/menu/:itemId/availability', async (req, res) => {
   try {
     const { itemId } = req.params;
     const { available } = req.body;
-    const restaurantId = req.user.restaurantInfo.restaurantId;
+    const restaurantId = req.user.restaurantInfo?.restaurantId;
+    
+    if (!restaurantId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Restaurant ID not found in user profile'
+      });
+    }
     
     const menuItem = await MenuItem.findOne({
       _id: itemId,
@@ -210,7 +236,7 @@ router.put('/menu/:itemId/availability', async (req, res) => {
       });
     }
     
-    menuItem.available = available;
+    menuItem.isAvailable = available;
     await menuItem.save();
     
     res.status(200).json({

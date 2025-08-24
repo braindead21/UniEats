@@ -17,7 +17,8 @@ const StudentSignup = () => {
     studentId: '',
     hostelBlock: '',
     roomNumber: '',
-    course: ''
+    course: '',
+    year: 1
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -55,11 +56,13 @@ const StudentSignup = () => {
         password: formData.password,
         role: 'student',
         phone: formData.phone,
+        collegeId: formData.studentId, // Add collegeId for validation
         studentInfo: {
           studentId: formData.studentId,
           hostelBlock: formData.hostelBlock,
           roomNumber: formData.roomNumber,
-          course: formData.course
+          course: formData.course,
+          year: parseInt(formData.year) || 1
         }
       });
 
@@ -159,7 +162,23 @@ const StudentSignup = () => {
 
             <div className="form-row">
               <div className="input-group">
-                <label>🏠 Hostel Block</label>
+                <label>� Academic Year</label>
+                <select 
+                  name="year"
+                  className="auth-input"
+                  value={formData.year}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value={1}>1st Year</option>
+                  <option value={2}>2nd Year</option>
+                  <option value={3}>3rd Year</option>
+                  <option value={4}>4th Year</option>
+                  <option value={5}>5th Year</option>
+                </select>
+              </div>
+              <div className="input-group">
+                <label>�🏠 Hostel Block</label>
                 <select 
                   name="hostelBlock"
                   className="auth-input"
@@ -175,6 +194,9 @@ const StudentSignup = () => {
                   <option value="E">Block E</option>
                 </select>
               </div>
+            </div>
+
+            <div className="form-row">
               <div className="input-group">
                 <label>🚪 Room Number</label>
                 <input 

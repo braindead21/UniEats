@@ -1,64 +1,59 @@
-// Test admin login and dashboard access
-const axios = require('axios');
+require('dotenv').config();
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const connectDB = require('./config/database');
+const User = require('./models/User');
 
-const baseURL = 'http://localhost:5000/api';
+connectDB();
 
 const testAdminLogin = async () => {
   try {
-    console.log('Testing admin login...');
+    console.log('🔍 Testing admin login process...');
     
-    // Login as admin
-    const loginResponse = await axios.post(`${baseURL}/auth/login`, {
-      email: 'admin@university.edu',
-      password: 'admin123'
-    });
+    // Find admin user
+    const admin = await User.findOne({ email: 'admin@unieats.com' }).select('+password');
     
-    console.log('✓ Admin login successful');
-    console.log('User role:', loginResponse.data.user.role);
-    
-    const token = loginResponse.data.token;
-    
-    // Test admin dashboard
-    console.log('\nTesting admin dashboard...');
-    const dashboardResponse = await axios.get(`${baseURL}/admin/dashboard`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    
-    console.log('✓ Admin dashboard access successful');
-    console.log('Dashboard stats:', JSON.stringify(dashboardResponse.data.data.stats, null, 2));
-    
-    // Test admin users endpoint
-    console.log('\nTesting admin users endpoint...');
-    const usersResponse = await axios.get(`${baseURL}/admin/users`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    
-    console.log('✓ Admin users endpoint successful');
-    console.log(`Found ${usersResponse.data.count} users`);
-    
-    console.log('\n🎉 All admin tests passed!');
-    
-  } catch (error) {
-    console.error('❌ Test failed:');
-    if (error.response) {
-      console.error('Status:', error.response.status);
-      console.error('Data:', error.response.data);
-    } else if (error.request) {
-      console.error('No response received:', error.request);
-    } else {
-      console.error('Error:', error.message);
+    if (!admin) {
+      console.log('❌ Admin user not found in database');
+      process.exit(1);
     }
-    console.error('Full error:', error);
+    
+    console.log('✅ Admin user found:', {
+      id: admin._id,
+      name: admin.name,
+      email: admin.email,
+      role: admin.role,
+      isActive: admin.isActive,
+      isVerified: admin.isVerified
+    });
+    
+    // Test password comparison
+    const testPassword = 'password123';
+    const isMatch = await admin.matchPassword(testPassword);
+    console.log('🔐 Password verification:', isMatch ? '✅ CORRECT' : '❌ INCORRECT');
+    
+    if (!isMatch) {
+      console.log('🔧 Fixing admin password...');
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(testPassword, salt);
+      
+      await User.findByIdAndUpdate(admin._id, {
+        password: hashedPassword
+      });
+      
+      console.log('✅ Admin password updated');
+      
+      // Test again
+      const updatedAdmin = await User.findOne({ email: 'admin@unieats.com' }).select('+password');
+      const isMatchAfterUpdate = await updatedAdmin.matchPassword(testPassword);
+      console.log('🔐 Password verification after update:', isMatchAfterUpdate ? '✅ CORRECT' : '❌ INCORRECT');
+    }
+    
+    process.exit(0);
+  } catch (error) {
+    console.error('❌ Error:', error);
+    process.exit(1);
   }
 };
 
-// Only run if not imported
-if (require.main === module) {
-  testAdminLogin();
-}
-
-module.exports = testAdminLogin;
+testAdminLogin();

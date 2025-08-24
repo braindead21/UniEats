@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
+import './RestaurantOwnerDashboard.css';
 
 const RestaurantOwnerDashboard = () => {
   const { user } = useAuth();
@@ -12,20 +13,30 @@ const RestaurantOwnerDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
+    
+    // Set up real-time refresh every 30 seconds
+    const interval = setInterval(() => {
+      fetchDashboardData();
+    }, 30000);
+    
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
   }, []);
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [dashboardRes, ordersRes, menuRes] = await Promise.all([
-        api.get('/restaurant-owner/dashboard'),
+      const [statsRes, ordersRes, menuRes] = await Promise.all([
+        api.get('/restaurant-owner/stats'),
         api.get('/restaurant-owner/orders'),
         api.get('/restaurant-owner/menu')
       ]);
 
-      setDashboardData(dashboardRes.data);
-      setOrders(ordersRes.data || []);
-      setMenuItems(menuRes.data || []);
+      if (statsRes.success) {
+        setDashboardData({ stats: statsRes.stats });
+      }
+      setOrders(ordersRes.orders || []);
+      setMenuItems(menuRes.menu || []);
     } catch (error) {
       console.error('Error fetching restaurant dashboard data:', error);
     } finally {
@@ -46,7 +57,7 @@ const RestaurantOwnerDashboard = () => {
 
   const toggleMenuItemAvailability = async (itemId, isAvailable) => {
     try {
-      await api.put(`/restaurant-owner/menu/${itemId}/availability`, { isAvailable });
+      await api.put(`/restaurant-owner/menu/${itemId}/availability`, { available: isAvailable });
       await fetchDashboardData(); // Refresh data
       alert(`Menu item ${isAvailable ? 'enabled' : 'disabled'} successfully!`);
     } catch (error) {
