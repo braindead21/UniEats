@@ -112,3 +112,57 @@ exports.requireVerification = (req, res, next) => {
   }
   next();
 };
+
+// Role-specific middleware
+exports.requireStudent = (req, res, next) => {
+  if (req.user.role !== 'student') {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied. Student role required.'
+    });
+  }
+  next();
+};
+
+exports.requireRestaurantOwner = (req, res, next) => {
+  if (req.user.role !== 'restaurant_owner') {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied. Restaurant owner role required.'
+    });
+  }
+  next();
+};
+
+exports.requireDeliveryPartner = (req, res, next) => {
+  if (req.user.role !== 'delivery_partner') {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied. Delivery partner role required.'
+    });
+  }
+  next();
+};
+
+exports.requireAdmin = (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied. Admin role required.'
+    });
+  }
+  next();
+};
+
+// Combined middleware for multiple roles
+exports.requireAnyRole = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: `Access denied. Required roles: ${roles.join(', ')}`
+      });
+    }
+    next();
+  };
+};

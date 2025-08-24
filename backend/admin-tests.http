@@ -1,0 +1,117 @@
+# Admin API Tests
+
+### Variables
+@baseUrl = http://localhost:5000/api
+@token = your_admin_jwt_token_here
+
+### Admin Login (First create admin user manually in database or use auth register)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@university.edu",
+  "password": "admin123"
+}
+
+###
+
+### Get Admin Dashboard
+GET {{baseUrl}}/admin/dashboard
+Authorization: Bearer {{token}}
+
+###
+
+### Get All Users
+GET {{baseUrl}}/admin/users
+Authorization: Bearer {{token}}
+
+###
+
+### Get Users with Filter (Students only)
+GET {{baseUrl}}/admin/users?role=student&page=1&limit=10
+Authorization: Bearer {{token}}
+
+###
+
+### Search Users
+GET {{baseUrl}}/admin/users?search=john&page=1&limit=10
+Authorization: Bearer {{token}}
+
+###
+
+### Get User Details
+GET {{baseUrl}}/admin/users/USER_ID_HERE
+Authorization: Bearer {{token}}
+
+###
+
+### Update User Status (Activate/Deactivate)
+PUT {{baseUrl}}/admin/users/USER_ID_HERE/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "isActive": false
+}
+
+###
+
+### Get All Orders
+GET {{baseUrl}}/admin/orders
+Authorization: Bearer {{token}}
+
+###
+
+### Get Orders with Filter
+GET {{baseUrl}}/admin/orders?status=pending&page=1&limit=10
+Authorization: Bearer {{token}}
+
+###
+
+### Get All Restaurants
+GET {{baseUrl}}/admin/restaurants
+Authorization: Bearer {{token}}
+
+###
+
+### Update Restaurant Status
+PUT {{baseUrl}}/admin/restaurants/RESTAURANT_ID_HERE/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "isActive": false
+}
+
+###
+
+### Create New Admin User
+POST {{baseUrl}}/admin/create-admin
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "New Admin",
+  "email": "newadmin@university.edu",
+  "password": "newadmin123"
+}
+
+###
+
+### Get Analytics (7 days)
+GET {{baseUrl}}/admin/analytics?period=7days
+Authorization: Bearer {{token}}
+
+###
+
+### Get Analytics (30 days)
+GET {{baseUrl}}/admin/analytics?period=30days
+Authorization: Bearer {{token}}
+
+###
+
+### Get Analytics (3 months)
+GET {{baseUrl}}/admin/analytics?period=3months
+Authorization: Bearer {{token}}
+
+###

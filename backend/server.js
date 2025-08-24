@@ -22,6 +22,9 @@ const partnerRoutes = require('./routes/partner');
 const restaurantRoutes = require('./routes/restaurants');
 const menuRoutes = require('./routes/menu');
 const orderRoutes = require('./routes/orders');
+const restaurantOwnerRoutes = require('./routes/restaurantOwner');
+const deliveryPartnerRoutes = require('./routes/deliveryPartner');
+const adminRoutes = require('./routes/admin');
 
 // Mount routers
 app.use('/api/auth', authRoutes);
@@ -29,6 +32,9 @@ app.use('/api/partner', partnerRoutes);
 app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/restaurant-owner', restaurantOwnerRoutes);
+app.use('/api/delivery-partner', deliveryPartnerRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Home route (should be the only accessible root route)
 app.get('/', (req, res) => {

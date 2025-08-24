@@ -1,10 +1,24 @@
 import './App.css';
+import './components/AdminDashboard.css';
+import './components/StudentDashboard.css';
 import { useState, useRef, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext.jsx';
 import { useCart } from './contexts/CartContext.jsx';
 import { useRestaurants } from './hooks/useRestaurants.js';
 import { api } from './services/api.js';
+import AdminDashboard from './components/AdminDashboard.jsx';
+import StudentDashboard from './components/StudentDashboard.jsx';
+import RestaurantOwnerDashboard from './components/RestaurantOwnerDashboard.jsx';
+
+// Import all new authentication components
+import AdminLogin from './components/AdminLogin.jsx';
+import StudentLogin from './components/StudentLogin.jsx';
+import StudentSignup from './components/StudentSignup.jsx';
+import RestaurantLogin from './components/RestaurantLogin.jsx';
+import RestaurantSignup from './components/RestaurantSignup.jsx';
+import DeliveryLogin from './components/DeliveryLogin.jsx';
+import DeliverySignup from './components/DeliverySignup.jsx';
 
 // ScrollInCard component for animation
 function ScrollInCard({ children, delay = 0, className = '', ...props }) {
@@ -97,10 +111,148 @@ function Signup() {
 }
 
 function OrdersPage() {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/orders');
+      setOrders(response.orders || []);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      setError('Failed to fetch orders');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'pending': return '#ffa500';
+      case 'confirmed': return '#2196f3';
+      case 'preparing': return '#ff9800';
+      case 'out_for_delivery': return '#9c27b0';
+      case 'delivered': return '#4caf50';
+      case 'cancelled': return '#f44336';
+      default: return '#757575';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="orders-page" style={{padding:'64px 20px', textAlign:'center'}}>
+        <h2>Your Orders</h2>
+        <p>Loading orders...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="orders-page" style={{padding:'64px 20px', textAlign:'center'}}>
+        <h2>Your Orders</h2>
+        <p style={{color: '#f44336'}}>{error}</p>
+        <button onClick={fetchOrders} style={{marginTop: '20px', padding: '10px 20px', backgroundColor: '#ff6b35', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer'}}>
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="orders-page" style={{padding:'64px 0', textAlign:'center'}}>
-      <h2>Your Orders</h2>
-      <p>All your past and current orders will appear here.</p>
+    <div className="orders-page" style={{padding:'64px 20px', maxWidth: '1200px', margin: '0 auto'}}>
+      <h2 style={{textAlign: 'center', marginBottom: '30px'}}>Your Orders</h2>
+      
+      {orders.length === 0 ? (
+        <div style={{textAlign: 'center', padding: '40px'}}>
+          <p style={{fontSize: '18px', color: '#666'}}>No orders found</p>
+          <p style={{color: '#888'}}>When you place orders, they will appear here.</p>
+        </div>
+      ) : (
+        <div className="orders-list">
+          {orders.map((order) => (
+            <div key={order._id} className="order-card" style={{
+              backgroundColor: 'white',
+              border: '1px solid #ddd',
+              borderRadius: '8px',
+              padding: '20px',
+              marginBottom: '20px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}>
+              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px'}}>
+                <div>
+                  <h3 style={{margin: '0 0 5px 0', color: '#333'}}>Order #{order.orderNumber}</h3>
+                  <p style={{margin: '0', color: '#666', fontSize: '14px'}}>{formatDate(order.createdAt)}</p>
+                </div>
+                <span style={{
+                  backgroundColor: getStatusColor(order.status),
+                  color: 'white',
+                  padding: '4px 12px',
+                  borderRadius: '20px',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase'
+                }}>
+                  {order.status.replace('_', ' ')}
+                </span>
+              </div>
+
+              <div style={{marginBottom: '15px'}}>
+                <p style={{margin: '0 0 10px 0', fontWeight: 'bold', color: '#333'}}>
+                  {order.restaurant?.name || 'Restaurant'}
+                </p>
+                <div className="order-items">
+                  {order.items.map((item, index) => (
+                    <div key={index} style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      padding: '5px 0',
+                      borderBottom: index < order.items.length - 1 ? '1px solid #eee' : 'none'
+                    }}>
+                      <span>{item.quantity}x {item.name}</span>
+                      <span>₹{item.price * item.quantity}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                borderTop: '1px solid #eee',
+                paddingTop: '15px'
+              }}>
+                <div style={{fontSize: '14px', color: '#666'}}>
+                  <p style={{margin: '0 0 5px 0'}}>Delivery to: {order.deliveryAddress?.name}</p>
+                  <p style={{margin: '0'}}>{order.deliveryAddress?.street}, {order.deliveryAddress?.city}</p>
+                </div>
+                <div style={{textAlign: 'right'}}>
+                  <p style={{margin: '0', fontSize: '18px', fontWeight: 'bold', color: '#333'}}>
+                    Total: ₹{order.pricing?.total || 0}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -219,6 +371,14 @@ function App() {
           <a href="/" className="nav-link" onClick={handleHomeClick}>Home</a>
           <a href="#restaurants" className="nav-link" onClick={e => handleNavSection(e, 'restaurants')}>Restaurants</a>
           <a href="#menu" className="nav-link" onClick={e => handleNavSection(e, 'menu')}>Menu</a>
+          {isAuthenticated && (
+            <Link to="/dashboard" className="nav-link">
+              {user?.role === 'admin' ? '🛡️ Admin Panel' : 
+               user?.role === 'restaurant_owner' ? '🏪 My Restaurant' :
+               user?.role === 'delivery_partner' ? '🏍️ Delivery Hub' :
+               '👨‍🎓 Dashboard'}
+            </Link>
+          )}
           <Link to="/orders" className="nav-link">Orders</Link>
         </nav>
         <div className="header-actions">
@@ -233,15 +393,123 @@ function App() {
               <button className="logout-btn" onClick={logout}>Logout</button>
             </div>
           ) : (
-            <>
-              <button className="login-btn" onClick={() => setModal('login')}>Login</button>
-              <button className="signup-btn" onClick={() => setModal('signup')}>Sign Up</button>
-            </>
+            <div className="header-auth-options">
+              <div className="auth-dropdown">
+                <button className="auth-dropdown-btn">Login 🔽</button>
+                <div className="auth-dropdown-content">
+                  <Link to="/admin/login" className="auth-dropdown-link">🛡️ Admin</Link>
+                  <Link to="/student/login" className="auth-dropdown-link">🎓 Student</Link>
+                  <Link to="/restaurant/login" className="auth-dropdown-link">🏪 Restaurant</Link>
+                  <Link to="/delivery/login" className="auth-dropdown-link">🏍️ Delivery Partner</Link>
+                </div>
+              </div>
+              <div className="auth-dropdown">
+                <button className="auth-dropdown-btn">Sign Up 🔽</button>
+                <div className="auth-dropdown-content">
+                  <Link to="/student/signup" className="auth-dropdown-link">🎓 Student Signup</Link>
+                  <Link to="/restaurant/signup" className="auth-dropdown-link">🏪 Restaurant Signup</Link>
+                  <Link to="/delivery/signup" className="auth-dropdown-link">🏍️ Delivery Signup</Link>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </header>
       {/* Main page content (always visible) */}
       <Routes>
+        {/* Authentication Routes */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/student/login" element={<StudentLogin />} />
+        <Route path="/student/signup" element={<StudentSignup />} />
+        <Route path="/restaurant/login" element={<RestaurantLogin />} />
+        <Route path="/restaurant/signup" element={<RestaurantSignup />} />
+        <Route path="/delivery/login" element={<DeliveryLogin />} />
+        <Route path="/delivery/signup" element={<DeliverySignup />} />
+        
+        {/* Dashboard Routes */}
+        <Route path="/dashboard" element={
+          isAuthenticated ? (
+            user?.role === 'admin' ? <AdminDashboard /> :
+            user?.role === 'restaurant_owner' ? <RestaurantOwnerDashboard /> :
+            user?.role === 'delivery_partner' ? <div style={{padding: '100px 20px', textAlign: 'center'}}><h2>🏍️ Delivery Partner Dashboard</h2><p>Coming Soon!</p></div> :
+            <StudentDashboard />
+          ) : (
+            <div style={{padding: '100px 20px', textAlign: 'center'}}>
+              <h2>Please login to access your dashboard</h2>
+              <div className="dashboard-auth-options" style={{marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap'}}>
+                <Link to="/student/login" className="dashboard-auth-btn">🎓 Student Login</Link>
+                <Link to="/restaurant/login" className="dashboard-auth-btn">🏪 Restaurant Login</Link>
+                <Link to="/delivery/login" className="dashboard-auth-btn">🏍️ Delivery Login</Link>
+                <Link to="/admin/login" className="dashboard-auth-btn">🛡️ Admin Login</Link>
+              </div>
+            </div>
+          )
+        } />
+        
+        {/* Role-Specific Dashboard Routes */}
+        <Route path="/admin/dashboard" element={
+          isAuthenticated && user?.role === 'admin' ? (
+            <AdminDashboard />
+          ) : (
+            <div style={{padding: '100px 20px', textAlign: 'center'}}>
+              <h2>🛡️ Admin Access Required</h2>
+              <p>You need admin privileges to access this page.</p>
+              <Link to="/admin/login" style={{marginTop: '20px', padding: '10px 20px', backgroundColor: '#ff6b35', color: 'white', textDecoration: 'none', borderRadius: '5px', display: 'inline-block'}}>
+                Admin Login
+              </Link>
+            </div>
+          )
+        } />
+        
+        <Route path="/student/dashboard" element={
+          isAuthenticated && user?.role === 'student' ? (
+            <StudentDashboard />
+          ) : (
+            <div style={{padding: '100px 20px', textAlign: 'center'}}>
+              <h2>🎓 Student Access Required</h2>
+              <p>You need to be logged in as a student to access this page.</p>
+              <Link to="/student/login" style={{marginTop: '20px', padding: '10px 20px', backgroundColor: '#ff6b35', color: 'white', textDecoration: 'none', borderRadius: '5px', display: 'inline-block'}}>
+                Student Login
+              </Link>
+            </div>
+          )
+        } />
+        
+        <Route path="/restaurant/dashboard" element={
+          isAuthenticated && user?.role === 'restaurant_owner' ? (
+            <RestaurantOwnerDashboard />
+          ) : (
+            <div style={{padding: '100px 20px', textAlign: 'center'}}>
+              <h2>🏪 Restaurant Owner Access Required</h2>
+              <p>You need to be logged in as a restaurant owner to access this page.</p>
+              <Link to="/restaurant/login" style={{marginTop: '20px', padding: '10px 20px', backgroundColor: '#ff6b35', color: 'white', textDecoration: 'none', borderRadius: '5px', display: 'inline-block'}}>
+                Restaurant Login
+              </Link>
+            </div>
+          )
+        } />
+        
+        <Route path="/delivery/dashboard" element={
+          isAuthenticated && user?.role === 'delivery_partner' ? (
+            <div style={{padding: '100px 20px', textAlign: 'center'}}>
+              <h2>🏍️ Delivery Partner Dashboard</h2>
+              <p>Coming Soon!</p>
+            </div>
+          ) : (
+            <div style={{padding: '100px 20px', textAlign: 'center'}}>
+              <h2>🏍️ Delivery Partner Access Required</h2>
+              <p>You need to be logged in as a delivery partner to access this page.</p>
+              <Link to="/delivery/login" style={{marginTop: '20px', padding: '10px 20px', backgroundColor: '#ff6b35', color: 'white', textDecoration: 'none', borderRadius: '5px', display: 'inline-block'}}>
+                Delivery Login
+              </Link>
+            </div>
+          )
+        } />
+        
+        {/* Orders Route */}
+        <Route path="/orders" element={<OrdersPage />} />
+        
+        {/* Home Route */}
         <Route path="/" element={
           <>
             {/* Hero Section */}

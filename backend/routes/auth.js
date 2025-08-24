@@ -7,7 +7,10 @@ const {
   updateDetails,
   updatePassword,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  registerStudent,
+  registerRestaurantOwner,
+  registerDeliveryPartner
 } = require('../controllers/authController');
 
 const { protect } = require('../middleware/auth');
@@ -23,6 +26,9 @@ const router = express.Router();
 
 // Public routes
 router.post('/register', validateRegister, handleValidationErrors, register);
+router.post('/register/student', registerStudent);
+router.post('/register/restaurant-owner', registerRestaurantOwner);
+router.post('/register/delivery-partner', registerDeliveryPartner);
 router.post('/login', validateLogin, handleValidationErrors, login);
 router.post('/forgotpassword', forgotPassword);
 router.put('/resetpassword/:resettoken', resetPassword);

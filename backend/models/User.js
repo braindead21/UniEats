@@ -35,18 +35,108 @@ const userSchema = new mongoose.Schema({
     type: String,
     maxlength: [20, 'Phone number cannot be longer than 20 characters']
   },
-  collegeId: {
-    type: String,
-    required: function() {
-      return this.role === 'student' || this.role === 'delivery_partner';
+  
+  // Campus-specific fields for students
+  studentInfo: {
+    studentId: {
+      type: String,
+      required: function() {
+        return this.role === 'student' && !this.isNew;
+      }
+    },
+    course: {
+      type: String,
+      required: function() {
+        return this.role === 'student' && !this.isNew;
+      }
+    },
+    year: {
+      type: Number,
+      required: function() {
+        return this.role === 'student' && !this.isNew;
+      }
+    },
+    hostelBlock: {
+      type: String,
+      required: function() {
+        return this.role === 'student' && !this.isNew;
+      }
+    },
+    roomNumber: {
+      type: String,
+      required: function() {
+        return this.role === 'student' && !this.isNew;
+      }
     }
   },
-  collegeIdDocument: {
-    type: String, // URL to uploaded college ID
-    required: function() {
-      return false; // Temporarily disable this requirement until file upload is implemented
+
+  // Restaurant owner specific fields
+  restaurantInfo: {
+    restaurantId: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Restaurant',
+      required: function() {
+        // Only require restaurantId if the user role is restaurant_owner AND this is not a new document
+        return this.role === 'restaurant_owner' && !this.isNew;
+      }
+    },
+    businessLicense: String,
+    verificationStatus: {
+      type: String,
+      enum: ['pending', 'verified', 'rejected'],
+      default: 'pending'
     }
   },
+
+  // Delivery partner specific fields
+  deliveryPartnerInfo: {
+    vehicleType: {
+      type: String,
+      enum: ['bicycle', 'motorcycle', 'scooter', 'walking'],
+      required: function() {
+        // Only require vehicleType if the user role is delivery_partner AND this is not a new document
+        return this.role === 'delivery_partner' && !this.isNew;
+      }
+    },
+    vehicleNumber: String,
+    drivingLicense: String,
+    isAvailable: {
+      type: Boolean,
+      default: false
+    },
+    currentLocation: {
+      type: {
+        type: String,
+        enum: ['Point']
+      },
+      coordinates: [Number]
+    },
+    deliveryZones: [{
+      type: String,
+      enum: ['north_campus', 'south_campus', 'hostels', 'academic_blocks', 'sports_complex']
+    }],
+    rating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5
+    },
+    totalDeliveries: {
+      type: Number,
+      default: 0
+    },
+    earnings: {
+      total: {
+        type: Number,
+        default: 0
+      },
+      thisMonth: {
+        type: Number,
+        default: 0
+      }
+    }
+  },
+
   profileImage: {
     type: String,
     default: 'default-avatar.jpg'

@@ -81,6 +81,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
+      console.log('Sending registration request:', userData);
       const response = await fetch('http://localhost:5000/api/auth/register', {
         method: 'POST',
         headers: {
@@ -89,7 +90,9 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify(userData),
       });
 
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (data.success) {
         setUser(data.user);
@@ -97,7 +100,19 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('token', data.token);
         return { success: true, user: data.user };
       } else {
-        return { success: false, message: data.message, errors: data.errors };
+        console.error('Registration failed:', data);
+        console.error('Validation errors detail:', JSON.stringify(data.errors, null, 2));
+        // Also log each error individually
+        if (data.errors && Array.isArray(data.errors)) {
+          data.errors.forEach((error, index) => {
+            console.error(`Error ${index + 1}:`, error);
+          });
+        }
+        return { 
+          success: false, 
+          message: data.message || 'Registration failed', 
+          errors: data.errors 
+        };
       }
     } catch (error) {
       console.error('Registration error:', error);

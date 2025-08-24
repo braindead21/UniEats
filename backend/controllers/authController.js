@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const User = require('../models/User');
+const Restaurant = require('../models/Restaurant');
 
 // Helper function to send token response
 const sendTokenResponse = (user, statusCode, res) => {
@@ -16,17 +17,29 @@ const sendTokenResponse = (user, statusCode, res) => {
       options.secure = true;
     }
 
+    // Prepare user data based on role
+    let userData = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isVerified: user.isVerified,
+      profileImage: user.profileImage
+    };
+
+    // Add role-specific data
+    if (user.role === 'restaurant_owner' && user.restaurantInfo) {
+      userData.restaurantInfo = user.restaurantInfo;
+    } else if (user.role === 'student' && user.studentInfo) {
+      userData.studentInfo = user.studentInfo;
+    } else if (user.role === 'delivery_partner' && user.deliveryPartnerInfo) {
+      userData.deliveryPartnerInfo = user.deliveryPartnerInfo;
+    }
+
     res.status(statusCode).cookie('token', token, options).json({
       success: true,
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        isVerified: user.isVerified,
-        profileImage: user.profileImage
-      }
+      user: userData
     });
   } catch (error) {
     console.error('Error in sendTokenResponse:', error);
@@ -43,8 +56,8 @@ const sendTokenResponse = (user, statusCode, res) => {
 // @access  Public
 exports.register = async (req, res, next) => {
   try {
-    console.log('Registration attempt:', req.body);
-    const { name, email, password, role, phone, collegeId } = req.body;
+    console.log('Registration attempt:', JSON.stringify(req.body, null, 2));
+    const { name, email, password, role, phone, collegeId, restaurantInfo, studentInfo, deliveryPartnerInfo } = req.body;
 
     // Check if user exists
     const existingUser = await User.findOne({ email });
@@ -56,34 +69,154 @@ exports.register = async (req, res, next) => {
       });
     }
 
-    // Create user
-    console.log('Creating user with data:', { name, email, role, phone, collegeId });
-    const user = await User.create({
+    let userData = {
       name,
       email,
       password,
       role: role || 'student',
       phone,
-      collegeId,
       isVerified: true // Set to true for testing - implement email verification later
-    });
+    };
+
+    // Handle role-specific data
+    if (role === 'restaurant_owner' && restaurantInfo) {
+      // Create user first WITHOUT restaurantInfo to avoid validation error
+      console.log('Creating user first for restaurant owner...');
+      const user = await User.create(userData);
+      
+      // Now create restaurant with the actual user ObjectId
+      console.log('Creating restaurant with user ID:', user._id);
+      const restaurant = await Restaurant.create({
+        name: restaurantInfo.restaurantName,
+        owner: user._id, // Use the actual user ObjectId
+        cuisine: Array.isArray(restaurantInfo.cuisine) 
+          ? restaurantInfo.cuisine 
+          : restaurantInfo.cuisine.includes(',') 
+            ? restaurantInfo.cuisine.split(',').map(c => c.trim())
+            : [restaurantInfo.cuisine],
+        description: restaurantInfo.description,
+        address: {
+          street: restaurantInfo.location,
+          city: 'Campus Area',
+          state: 'State',
+          zipCode: '000000'
+        },
+        phone: phone,
+        email: email,
+        isActive: false, // Will be activated after approval
+        isApproved: false, // Requires admin approval
+        licenseNumber: restaurantInfo.businessLicense || 'PENDING',
+        licenseDocument: 'pending-upload', // Will be updated when document is uploaded
+        rating: 4.0, // Set default rating to 4.0 to meet minimum requirement
+        totalReviews: 0,
+        operatingHours: {
+          monday: { open: '09:00', close: '22:00', isClosed: false },
+          tuesday: { open: '09:00', close: '22:00', isClosed: false },
+          wednesday: { open: '09:00', close: '22:00', isClosed: false },
+          thursday: { open: '09:00', close: '22:00', isClosed: false },
+          friday: { open: '09:00', close: '22:00', isClosed: false },
+          saturday: { open: '09:00', close: '22:00', isClosed: false },
+          sunday: { open: '09:00', close: '22:00', isClosed: false }
+        }
+      });
+
+      // Now update user with restaurant info using findByIdAndUpdate to avoid validation
+      await User.findByIdAndUpdate(user._id, {
+        $set: {
+          'restaurantInfo.restaurantId': restaurant._id,
+          'restaurantInfo.businessLicense': restaurantInfo.businessLicense,
+          'restaurantInfo.verificationStatus': 'pending'
+        }
+      });
+
+      // Fetch the updated user to send in response
+      const updatedUser = await User.findById(user._id);
+
+      console.log('Restaurant and user created successfully');
+      sendTokenResponse(updatedUser, 201, res);
+      return;
+    } else if (role === 'delivery_partner' && deliveryPartnerInfo) {
+      // Create delivery partner user first without deliveryPartnerInfo to avoid validation error
+      console.log('Creating delivery partner user first...');
+      const user = await User.create(userData);
+      
+      // Now update user with delivery partner info using findByIdAndUpdate to avoid validation
+      await User.findByIdAndUpdate(user._id, {
+        $set: {
+          'deliveryPartnerInfo.vehicleType': deliveryPartnerInfo.vehicleType,
+          'deliveryPartnerInfo.vehicleNumber': deliveryPartnerInfo.vehicleNumber,
+          'deliveryPartnerInfo.drivingLicense': deliveryPartnerInfo.licenseNumber,
+          'deliveryPartnerInfo.isAvailable': false,
+          'deliveryPartnerInfo.deliveryZones': ['north_campus'], // Default zone
+          'deliveryPartnerInfo.rating': 0,
+          'deliveryPartnerInfo.totalDeliveries': 0,
+          'deliveryPartnerInfo.earnings.total': 0,
+          'deliveryPartnerInfo.earnings.thisMonth': 0
+        }
+      });
+
+      // Fetch the updated user to send in response
+      const updatedUser = await User.findById(user._id);
+
+      console.log('Delivery partner user created successfully');
+      sendTokenResponse(updatedUser, 201, res);
+      return;
+    } else if (role === 'student' && studentInfo) {
+      // Create student user first without studentInfo to avoid validation error
+      console.log('Creating student user first...');
+      const user = await User.create(userData);
+      
+      // Now update user with student info using findByIdAndUpdate to avoid validation
+      await User.findByIdAndUpdate(user._id, {
+        $set: {
+          'studentInfo.studentId': studentInfo.studentId,
+          'studentInfo.course': studentInfo.course,
+          'studentInfo.year': studentInfo.year,
+          'studentInfo.hostelBlock': studentInfo.hostelBlock,
+          'studentInfo.roomNumber': studentInfo.roomNumber
+        }
+      });
+
+      // Fetch the updated user to send in response
+      const updatedUser = await User.findById(user._id);
+
+      console.log('Student user created successfully');
+      sendTokenResponse(updatedUser, 201, res);
+      return;
+    }
+
+    // Create user for non-restaurant roles
+    console.log('Creating user with data:', userData);
+    const user = await User.create(userData);
 
     console.log('User created successfully:', user._id);
-
-    // Generate email verification token (implement later)
-    // await sendVerificationEmail(user);
 
     sendTokenResponse(user, 201, res);
   } catch (error) {
     console.error('Registration error:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
     
     // Handle validation errors specifically
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(err => err.message);
+      console.error('Validation errors:', errors);
       return res.status(400).json({
         success: false,
         message: 'Validation Error',
         errors: errors
+      });
+    }
+
+    // Handle duplicate key errors
+    if (error.code === 11000) {
+      console.error('Duplicate key error:', error.keyValue);
+      return res.status(400).json({
+        success: false,
+        message: 'User already exists with this email'
       });
     }
 
@@ -309,6 +442,163 @@ exports.resetPassword = async (req, res, next) => {
     res.status(500).json({
       success: false,
       message: 'Server error during password reset'
+    });
+  }
+};
+
+// @desc    Register student
+// @route   POST /api/auth/register/student
+// @access  Public
+exports.registerStudent = async (req, res) => {
+  try {
+    const { 
+      name, 
+      email, 
+      password, 
+      phone,
+      studentId,
+      course,
+      year,
+      hostelBlock,
+      roomNumber
+    } = req.body;
+
+    // Temporarily disabled for testing - student email validation
+    // if (!email.includes('@university.edu') && !email.includes('@uni.edu')) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'Please use a valid university email address'
+    //   });
+    // }
+
+    // Create user
+    const user = await User.create({
+      name,
+      email,
+      password,
+      phone,
+      role: 'student',
+      studentInfo: {
+        studentId,
+        course,
+        year,
+        hostelBlock,
+        roomNumber
+      }
+    });
+
+    sendTokenResponse(user, 201, res);
+  } catch (error) {
+    console.error('Student registration error:', error);
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'User already exists'
+      });
+    }
+    res.status(500).json({
+      success: false,
+      message: 'Server error during registration'
+    });
+  }
+};
+
+// @desc    Register restaurant owner
+// @route   POST /api/auth/register/restaurant-owner
+// @access  Public
+exports.registerRestaurantOwner = async (req, res) => {
+  try {
+    const { 
+      name, 
+      email, 
+      password, 
+      phone,
+      restaurantId,
+      businessLicense
+    } = req.body;
+
+    // Create user
+    const user = await User.create({
+      name,
+      email,
+      password,
+      phone,
+      role: 'restaurant_owner',
+      restaurantInfo: {
+        restaurantId,
+        businessLicense,
+        verificationStatus: 'pending'
+      }
+    });
+
+    sendTokenResponse(user, 201, res);
+  } catch (error) {
+    console.error('Restaurant owner registration error:', error);
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'User already exists'
+      });
+    }
+    res.status(500).json({
+      success: false,
+      message: 'Server error during registration'
+    });
+  }
+};
+
+// @desc    Register delivery partner
+// @route   POST /api/auth/register/delivery-partner
+// @access  Public
+exports.registerDeliveryPartner = async (req, res) => {
+  try {
+    const { 
+      name, 
+      email, 
+      password, 
+      phone,
+      vehicleType,
+      vehicleNumber,
+      drivingLicense,
+      deliveryZones
+    } = req.body;
+
+    // Temporarily disabled for testing - delivery partner email validation
+    // if (!email.includes('@university.edu') && !email.includes('@uni.edu')) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'Delivery partners must use university email address'
+    //   });
+    // }
+
+    // Create user
+    const user = await User.create({
+      name,
+      email,
+      password,
+      phone,
+      role: 'delivery_partner',
+      deliveryPartnerInfo: {
+        vehicleType,
+        vehicleNumber,
+        drivingLicense,
+        deliveryZones: deliveryZones || ['north_campus'],
+        isAvailable: false
+      }
+    });
+
+    sendTokenResponse(user, 201, res);
+  } catch (error) {
+    console.error('Delivery partner registration error:', error);
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'User already exists'
+      });
+    }
+    res.status(500).json({
+      success: false,
+      message: 'Server error during registration'
     });
   }
 };

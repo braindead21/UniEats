@@ -144,11 +144,11 @@ const restaurantSchema = new mongoose.Schema({
   tags: [String],
   licenseNumber: {
     type: String,
-    required: [true, 'Please add a license number']
+    default: 'PENDING'
   },
   licenseDocument: {
     type: String, // URL to uploaded license document
-    required: [true, 'Please upload license document']
+    default: 'pending-upload'
   },
   averageOrderValue: {
     type: Number,
