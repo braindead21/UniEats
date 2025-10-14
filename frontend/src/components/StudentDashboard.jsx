@@ -2,6 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { api } from '../services/api';
+import { 
+  FiUser, FiPackage, FiShoppingCart, FiDollarSign, 
+  FiHeart, FiRefreshCw, FiMail, FiPhone, FiCalendar, 
+  FiEdit, FiLock, FiMapPin, FiX, FiRotateCcw, FiEye
+} from 'react-icons/fi';
+import { 
+  BiUserCircle, BiRestaurant 
+} from 'react-icons/bi';
+import { 
+  AiOutlineShoppingCart, AiOutlineHeart 
+} from 'react-icons/ai';
+import { 
+  MdDeliveryDining, MdOutlineStarRate 
+} from 'react-icons/md';
+import { 
+  HiOutlineAcademicCap 
+} from 'react-icons/hi2';
 
 const StudentDashboard = () => {
   const { user } = useAuth();
@@ -81,14 +98,14 @@ const StudentDashboard = () => {
   return (
     <div className="student-dashboard">
       <div className="dashboard-header">
-        <h1>👨‍🎓 Welcome back, {user?.name}!</h1>
+        <h1><HiOutlineAcademicCap className="header-icon" /> Welcome back, {user?.name}!</h1>
         <p>Track your orders and discover amazing food</p>
       </div>
 
       {/* Quick Stats */}
       <div className="dashboard-stats">
         <div className="stat-card">
-          <div className="stat-icon">📦</div>
+          <div className="stat-icon"><FiPackage /></div>
           <div className="stat-info">
             <h3>{orders.length}</h3>
             <p>Total Orders</p>
@@ -96,7 +113,7 @@ const StudentDashboard = () => {
         </div>
         
         <div className="stat-card">
-          <div className="stat-icon">💰</div>
+          <div className="stat-icon"><FiDollarSign /></div>
           <div className="stat-info">
             <h3>₹{totalSpent}</h3>
             <p>Total Spent</p>
@@ -104,7 +121,7 @@ const StudentDashboard = () => {
         </div>
         
         <div className="stat-card">
-          <div className="stat-icon">🛒</div>
+          <div className="stat-icon"><FiShoppingCart /></div>
           <div className="stat-info">
             <h3>{getCartCount()}</h3>
             <p>Items in Cart</p>
@@ -112,7 +129,7 @@ const StudentDashboard = () => {
         </div>
         
         <div className="stat-card">
-          <div className="stat-icon">🏪</div>
+          <div className="stat-icon"><BiRestaurant /></div>
           <div className="stat-info">
             <h3>{topRestaurant}</h3>
             <p>Favorite Restaurant</p>
@@ -126,19 +143,19 @@ const StudentDashboard = () => {
           className={`dashboard-tab ${activeTab === 'profile' ? 'active' : ''}`}
           onClick={() => setActiveTab('profile')}
         >
-          👤 Profile
+          <FiUser className="tab-icon" /> Profile
         </button>
         <button 
           className={`dashboard-tab ${activeTab === 'orders' ? 'active' : ''}`}
           onClick={() => setActiveTab('orders')}
         >
-          📦 My Orders ({orders.length})
+          <FiPackage className="tab-icon" /> My Orders ({orders.length})
         </button>
         <button 
           className={`dashboard-tab ${activeTab === 'favorites' ? 'active' : ''}`}
           onClick={() => setActiveTab('favorites')}
         >
-          ❤️ Favorites
+          <FiHeart className="tab-icon" /> Favorites
         </button>
       </div>
 
@@ -160,21 +177,21 @@ const StudentDashboard = () => {
               
               <div className="profile-details">
                 <div className="detail-row">
-                  <span className="detail-label">📧 Email:</span>
+                  <span className="detail-label"><FiMail className="detail-icon" /> Email:</span>
                   <span className="detail-value">{user?.email}</span>
                 </div>
                 {user?.phone && (
                   <div className="detail-row">
-                    <span className="detail-label">📱 Phone:</span>
+                    <span className="detail-label"><FiPhone className="detail-icon" /> Phone:</span>
                     <span className="detail-value">{user?.phone}</span>
                   </div>
                 )}
                 <div className="detail-row">
-                  <span className="detail-label">🎓 Role:</span>
+                  <span className="detail-label"><HiOutlineAcademicCap className="detail-icon" /> Role:</span>
                   <span className="detail-value">Student</span>
                 </div>
                 <div className="detail-row">
-                  <span className="detail-label">📅 Joined:</span>
+                  <span className="detail-label"><FiCalendar className="detail-icon" /> Joined:</span>
                   <span className="detail-value">
                     {user?.createdAt ? formatDate(user.createdAt) : 'Recently'}
                   </span>
@@ -183,10 +200,10 @@ const StudentDashboard = () => {
               
               <div className="profile-actions">
                 <button className="profile-btn primary">
-                  ✏️ Edit Profile
+                  <FiEdit className="btn-icon" /> Edit Profile
                 </button>
                 <button className="profile-btn secondary">
-                  🔒 Change Password
+                  <FiLock className="btn-icon" /> Change Password
                 </button>
               </div>
             </div>
@@ -199,19 +216,19 @@ const StudentDashboard = () => {
         <div className="dashboard-content">
           <div className="orders-section">
             <div className="section-header">
-              <h2>📦 Your Orders</h2>
+              <h2><FiPackage className="section-icon" /> Your Orders</h2>
               <button className="refresh-btn" onClick={fetchStudentData}>
-                🔄 Refresh
+                <FiRefreshCw className="btn-icon" /> Refresh
               </button>
             </div>
             
             {orders.length === 0 ? (
               <div className="empty-state">
-                <div className="empty-icon">🍽️</div>
+                <div className="empty-icon"><BiRestaurant /></div>
                 <h3>No orders yet!</h3>
                 <p>When you place orders, they will appear here.</p>
                 <button className="cta-btn" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
-                  🛒 Start Ordering
+                  <AiOutlineShoppingCart className="btn-icon" /> Start Ordering
                 </button>
               </div>
             ) : (
@@ -246,7 +263,7 @@ const StudentDashboard = () => {
                     
                     {order.deliveryAddress && (
                       <div className="order-address">
-                        <span className="address-label">📍 Delivery to:</span>
+                        <span className="address-label"><FiMapPin className="address-icon" /> Delivery to:</span>
                         <span className="address-text">
                           {order.deliveryAddress.name}, {order.deliveryAddress.street}
                         </span>
@@ -255,16 +272,16 @@ const StudentDashboard = () => {
                     
                     <div className="order-actions">
                       <button className="order-btn secondary">
-                        📋 View Details
+                        <FiEye className="btn-icon" /> View Details
                       </button>
                       {order.status === 'delivered' && (
                         <button className="order-btn primary">
-                          🔄 Reorder
+                          <FiRotateCcw className="btn-icon" /> Reorder
                         </button>
                       )}
                       {order.status === 'pending' && (
                         <button className="order-btn danger">
-                          ❌ Cancel Order
+                          <FiX className="btn-icon" /> Cancel Order
                         </button>
                       )}
                     </div>
@@ -281,15 +298,15 @@ const StudentDashboard = () => {
         <div className="dashboard-content">
           <div className="favorites-section">
             <div className="section-header">
-              <h2>❤️ Your Favorites</h2>
+              <h2><FiHeart className="section-icon" /> Your Favorites</h2>
             </div>
             
             <div className="empty-state">
-              <div className="empty-icon">❤️</div>
+              <div className="empty-icon"><AiOutlineHeart /></div>
               <h3>No favorites yet!</h3>
               <p>Add items to favorites while browsing restaurants.</p>
               <button className="cta-btn" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
-                🍽️ Explore Menu
+                <BiRestaurant className="btn-icon" /> Explore Menu
               </button>
             </div>
           </div>

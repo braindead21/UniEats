@@ -1,6 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
+import { 
+  FiUsers, FiPackage, FiShield, FiRefreshCw, 
+  FiTrendingUp, FiDollarSign, FiClock, FiCheck,
+  FiX, FiUserCheck, FiUserX, FiEye, FiSettings,
+  FiBarChart, FiActivity, FiHome
+} from 'react-icons/fi';
+import { 
+  BiRestaurant, BiUser, BiCrown 
+} from 'react-icons/bi';
+import { 
+  MdDeliveryDining, MdOutlineAdminPanelSettings,
+  MdOutlineRestaurantMenu 
+} from 'react-icons/md';
+import { 
+  HiOutlineAcademicCap 
+} from 'react-icons/hi2';
+import { 
+  RiAdminLine 
+} from 'react-icons/ri';
 
 // Admin Dashboard Component
 const AdminDashboard = () => {
@@ -79,7 +98,7 @@ const AdminDashboard = () => {
   return (
     <div className="admin-dashboard">
       <div className="admin-header">
-        <h1>🛡️ Admin Dashboard</h1>
+        <h1><MdOutlineAdminPanelSettings className="header-icon" /> Admin Dashboard</h1>
         <p>Complete platform control and oversight</p>
       </div>
 
@@ -89,25 +108,25 @@ const AdminDashboard = () => {
           className={`admin-tab ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => setActiveTab('overview')}
         >
-          📊 Overview
+          <FiBarChart className="tab-icon" /> Overview
         </button>
         <button 
           className={`admin-tab ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => setActiveTab('users')}
         >
-          👥 Users ({users.length})
+          <FiUsers className="tab-icon" /> Users ({users.length})
         </button>
         <button 
           className={`admin-tab ${activeTab === 'orders' ? 'active' : ''}`}
           onClick={() => setActiveTab('orders')}
         >
-          📦 Orders ({orders.length})
+          <FiPackage className="tab-icon" /> Orders ({orders.length})
         </button>
         <button 
           className={`admin-tab ${activeTab === 'restaurants' ? 'active' : ''}`}
           onClick={() => setActiveTab('restaurants')}
         >
-          🏪 Restaurants ({restaurants.length})
+          <BiRestaurant className="tab-icon" /> Restaurants ({restaurants.length})
         </button>
       </div>
 
@@ -117,7 +136,7 @@ const AdminDashboard = () => {
           <div className="admin-stats-grid">
             <div className="admin-stat-card">
               <div className="stat-header">
-                <h3>👨‍🎓 Students</h3>
+                <h3><HiOutlineAcademicCap className="stat-icon" /> Students</h3>
                 <span className="stat-number">{dashboardData.stats.users.students}</span>
               </div>
               <p>Active student accounts</p>
@@ -125,7 +144,7 @@ const AdminDashboard = () => {
             
             <div className="admin-stat-card">
               <div className="stat-header">
-                <h3>🏪 Restaurant Owners</h3>
+                <h3><BiRestaurant className="stat-icon" /> Restaurant Owners</h3>
                 <span className="stat-number">{dashboardData.stats.users.restaurantOwners}</span>
               </div>
               <p>Restaurant partners</p>
@@ -133,7 +152,7 @@ const AdminDashboard = () => {
             
             <div className="admin-stat-card">
               <div className="stat-header">
-                <h3>🏍️ Delivery Partners</h3>
+                <h3><MdDeliveryDining className="stat-icon" /> Delivery Partners</h3>
                 <span className="stat-number">{dashboardData.stats.users.deliveryPartners}</span>
               </div>
               <p>Available: {dashboardData.stats.activeDeliveryPartners}</p>
@@ -141,7 +160,7 @@ const AdminDashboard = () => {
             
             <div className="admin-stat-card">
               <div className="stat-header">
-                <h3>📦 Total Orders</h3>
+                <h3><FiPackage className="stat-icon" /> Total Orders</h3>
                 <span className="stat-number">{dashboardData.stats.orders.total}</span>
               </div>
               <p>Pending: {dashboardData.stats.orders.pending}</p>
@@ -149,7 +168,7 @@ const AdminDashboard = () => {
             
             <div className="admin-stat-card">
               <div className="stat-header">
-                <h3>💰 Today's Revenue</h3>
+                <h3><FiDollarSign className="stat-icon" /> Today's Revenue</h3>
                 <span className="stat-number">₹{dashboardData.stats.revenue.today}</span>
               </div>
               <p>Orders today: {dashboardData.stats.orders.today}</p>
@@ -157,7 +176,7 @@ const AdminDashboard = () => {
             
             <div className="admin-stat-card">
               <div className="stat-header">
-                <h3>🍽️ Restaurants</h3>
+                <h3><BiRestaurant className="stat-icon" /> Restaurants</h3>
                 <span className="stat-number">{dashboardData.stats.restaurants}</span>
               </div>
               <p>Active partners</p>
@@ -167,7 +186,7 @@ const AdminDashboard = () => {
           {/* Recent Activities */}
           <div className="admin-recent-activities">
             <div className="recent-section">
-              <h3>🕒 Recent Orders</h3>
+              <h3><FiClock className="section-icon" /> Recent Orders</h3>
               <div className="recent-list">
                 {dashboardData.recentActivities.orders.map(order => (
                   <div key={order._id} className="recent-item">
@@ -185,7 +204,7 @@ const AdminDashboard = () => {
             </div>
             
             <div className="recent-section">
-              <h3>👤 New Users</h3>
+              <h3><BiUser className="section-icon" /> New Users</h3>
               <div className="recent-list">
                 {dashboardData.recentActivities.users.map(user => (
                   <div key={user._id} className="recent-item">
@@ -208,10 +227,10 @@ const AdminDashboard = () => {
       {activeTab === 'users' && (
         <div className="admin-users">
           <div className="admin-section-header">
-            <h2>👥 User Management</h2>
+            <h2><FiUsers className="section-icon" /> User Management</h2>
             <div className="admin-actions">
               <button className="admin-btn primary" onClick={fetchDashboardData}>
-                🔄 Refresh
+                <FiRefreshCw className="btn-icon" /> Refresh
               </button>
             </div>
           </div>
@@ -245,7 +264,7 @@ const AdminDashboard = () => {
                     </td>
                     <td>
                       <span className={`status-indicator ${user.isActive ? 'active' : 'inactive'}`}>
-                        {user.isActive ? '✅ Active' : '❌ Inactive'}
+                        {user.isActive ? <><FiCheck className="status-icon" /> Active</> : <><FiX className="status-icon" /> Inactive</>}
                       </span>
                     </td>
                     <td>{new Date(user.createdAt).toLocaleDateString()}</td>
@@ -255,7 +274,7 @@ const AdminDashboard = () => {
                           className={`admin-btn ${user.isActive ? 'danger' : 'success'}`}
                           onClick={() => updateUserStatus(user._id, !user.isActive)}
                         >
-                          {user.isActive ? '🚫 Deactivate' : '✅ Activate'}
+                          {user.isActive ? <><FiUserX className="btn-icon" /> Deactivate</> : <><FiUserCheck className="btn-icon" /> Activate</>}
                         </button>
                       </div>
                     </td>
@@ -271,10 +290,10 @@ const AdminDashboard = () => {
       {activeTab === 'orders' && (
         <div className="admin-orders">
           <div className="admin-section-header">
-            <h2>📦 Order Management</h2>
+            <h2><FiPackage className="section-icon" /> Order Management</h2>
             <div className="admin-actions">
               <button className="admin-btn primary" onClick={fetchDashboardData}>
-                🔄 Refresh
+                <FiRefreshCw className="btn-icon" /> Refresh
               </button>
             </div>
           </div>
@@ -338,10 +357,10 @@ const AdminDashboard = () => {
       {activeTab === 'restaurants' && (
         <div className="admin-restaurants">
           <div className="admin-section-header">
-            <h2>🏪 Restaurant Management</h2>
+            <h2><BiRestaurant className="section-icon" /> Restaurant Management</h2>
             <div className="admin-actions">
               <button className="admin-btn primary" onClick={fetchDashboardData}>
-                🔄 Refresh
+                <FiRefreshCw className="btn-icon" /> Refresh
               </button>
             </div>
           </div>
@@ -376,13 +395,13 @@ const AdminDashboard = () => {
                 
                 <div className="restaurant-admin-actions">
                   <span className={`status-indicator ${restaurant.isActive ? 'active' : 'inactive'}`}>
-                    {restaurant.isActive ? '✅ Active' : '❌ Inactive'}
+                    {restaurant.isActive ? <><FiCheck className="status-icon" /> Active</> : <><FiX className="status-icon" /> Inactive</>}
                   </span>
                   <button
                     className={`admin-btn ${restaurant.isActive ? 'danger' : 'success'}`}
                     onClick={() => updateRestaurantStatus(restaurant._id, !restaurant.isActive)}
                   >
-                    {restaurant.isActive ? '🚫 Deactivate' : '✅ Activate'}
+                    {restaurant.isActive ? <><FiX className="btn-icon" /> Deactivate</> : <><FiCheck className="btn-icon" /> Activate</>}
                   </button>
                 </div>
               </div>

@@ -2,6 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import './DeliveryPartnerDashboard.css';
+import { 
+  FiPackage, FiDollarSign, FiRefreshCw, FiCheck,
+  FiClock, FiMapPin, FiPhone, FiUser, FiBarChart,
+  FiTrendingUp, FiActivity, FiStar
+} from 'react-icons/fi';
+import { 
+  BiUser, BiRestaurant 
+} from 'react-icons/bi';
+import { 
+  MdDeliveryDining, MdOutlineStarRate, MdOutlineLocationOn 
+} from 'react-icons/md';
+import { 
+  RiMotorbikeFill, RiShoppingBag3Line 
+} from 'react-icons/ri';
+import { 
+  AiOutlineShoppingCart 
+} from 'react-icons/ai';
 
 const DeliveryPartnerDashboard = () => {
   const { user } = useAuth();
@@ -157,7 +174,7 @@ const DeliveryPartnerDashboard = () => {
       <div className="dashboard-header">
         <div className="header-content">
           <div className="header-left">
-            <h1>🏍️ Delivery Partner Dashboard</h1>
+            <h1><MdDeliveryDining className="header-icon" /> Delivery Partner Dashboard</h1>
             <p className="welcome-text">
               Welcome back, {user?.name}! Ready to deliver some happiness?
             </p>
@@ -173,11 +190,11 @@ const DeliveryPartnerDashboard = () => {
                 <span className="toggle-slider"></span>
               </label>
               <span className={`online-status ${isOnline ? 'online' : 'offline'}`}>
-                {isOnline ? '🟢 Online' : '🔴 Offline'}
+                {isOnline ? <><FiActivity className="status-icon" /> Online</> : <><FiClock className="status-icon" /> Offline</>}
               </span>
             </div>
             <button className="refresh-btn" onClick={fetchDashboardData}>
-              🔄 Refresh
+              <FiRefreshCw className="btn-icon" /> Refresh
             </button>
           </div>
         </div>
@@ -187,25 +204,25 @@ const DeliveryPartnerDashboard = () => {
             className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
             onClick={() => setActiveTab('overview')}
           >
-            📊 Overview
+            <FiBarChart className="tab-icon" /> Overview
           </button>
           <button 
             className={`tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
             onClick={() => setActiveTab('orders')}
           >
-            📦 Available Orders
+            <FiPackage className="tab-icon" /> Available Orders
           </button>
           <button 
             className={`tab-btn ${activeTab === 'deliveries' ? 'active' : ''}`}
             onClick={() => setActiveTab('deliveries')}
           >
-            🚚 My Deliveries
+            <MdDeliveryDining className="tab-icon" /> My Deliveries
           </button>
           <button 
             className={`tab-btn ${activeTab === 'earnings' ? 'active' : ''}`}
             onClick={() => setActiveTab('earnings')}
           >
-            💰 Earnings
+            <FiDollarSign className="tab-icon" /> Earnings
           </button>
         </div>
       </div>
@@ -223,7 +240,7 @@ const DeliveryPartnerDashboard = () => {
           <div className="stats-overview">
             <div className="stats-grid">
               <div className="stat-card">
-                <div className="stat-icon">📊</div>
+                <div className="stat-icon"><FiBarChart /></div>
                 <div className="stat-content">
                   <h3>Total Deliveries</h3>
                   <p className="stat-number">{dashboardStats.totalDeliveries}</p>
@@ -232,7 +249,7 @@ const DeliveryPartnerDashboard = () => {
               </div>
 
               <div className="stat-card">
-                <div className="stat-icon">🚚</div>
+                <div className="stat-icon"><MdDeliveryDining /></div>
                 <div className="stat-content">
                   <h3>Today's Deliveries</h3>
                   <p className="stat-number">{dashboardStats.todayDeliveries}</p>
@@ -241,7 +258,7 @@ const DeliveryPartnerDashboard = () => {
               </div>
 
               <div className="stat-card">
-                <div className="stat-icon">💰</div>
+                <div className="stat-icon"><FiDollarSign /></div>
                 <div className="stat-content">
                   <h3>Total Earnings</h3>
                   <p className="stat-number">₹{dashboardStats.totalEarnings}</p>
@@ -250,7 +267,7 @@ const DeliveryPartnerDashboard = () => {
               </div>
 
               <div className="stat-card">
-                <div className="stat-icon">💵</div>
+                <div className="stat-icon"><FiTrendingUp /></div>
                 <div className="stat-content">
                   <h3>Today's Earnings</h3>
                   <p className="stat-number">₹{dashboardStats.todayEarnings}</p>
@@ -259,7 +276,7 @@ const DeliveryPartnerDashboard = () => {
               </div>
 
               <div className="stat-card">
-                <div className="stat-icon">⭐</div>
+                <div className="stat-icon"><FiStar /></div>
                 <div className="stat-content">
                   <h3>Rating</h3>
                   <p className="stat-number">{dashboardStats.currentRating.toFixed(1)}</p>
@@ -268,7 +285,7 @@ const DeliveryPartnerDashboard = () => {
               </div>
 
               <div className="stat-card">
-                <div className="stat-icon">✅</div>
+                <div className="stat-icon"><FiCheck /></div>
                 <div className="stat-content">
                   <h3>Completed Orders</h3>
                   <p className="stat-number">{dashboardStats.completedOrders}</p>
@@ -285,27 +302,27 @@ const DeliveryPartnerDashboard = () => {
         <div className="dashboard-content">
           <div className="orders-section">
             <div className="section-header">
-              <h2>📦 Available Orders</h2>
+              <h2><FiPackage className="section-icon" /> Available Orders</h2>
               <div className="header-actions">
                 {!isOnline && (
                   <div className="offline-notice">
-                    <span>🔴 You're offline. Go online to see available orders!</span>
+                    <span><FiClock className="notice-icon" /> You're offline. Go online to see available orders!</span>
                   </div>
                 )}
                 <button className="refresh-btn" onClick={fetchDashboardData}>
-                  🔄 Refresh
+                  <FiRefreshCw className="btn-icon" /> Refresh
                 </button>
               </div>
             </div>
             
             {availableOrders.length === 0 ? (
               <div className="empty-state">
-                <div className="empty-icon">📦</div>
+                <div className="empty-icon"><FiPackage /></div>
                 <h3>{isOnline ? 'No orders available!' : 'Go online to see orders'}</h3>
                 <p>{isOnline ? 'New orders will appear here when available.' : 'Toggle your online status to start receiving orders.'}</p>
                 {!isOnline && (
                   <button className="cta-btn" onClick={toggleOnlineStatus}>
-                    🟢 Go Online
+                    <FiActivity className="btn-icon" /> Go Online
                   </button>
                 )}
               </div>
@@ -326,19 +343,19 @@ const DeliveryPartnerDashboard = () => {
                     
                     <div className="order-details">
                       <div className="restaurant-info">
-                        <h4>🏪 {order.restaurant?.name}</h4>
+                        <h4><BiRestaurant className="inline-icon" /> {order.restaurant?.name}</h4>
                         <p>{order.restaurant?.address}</p>
                       </div>
                       
                       <div className="delivery-info">
-                        <h4>📍 Delivery Address</h4>
+                        <h4><FiMapPin className="inline-icon" /> Delivery Address</h4>
                         <p>{order.deliveryAddress?.name}</p>
                         <p>{order.deliveryAddress?.street}, {order.deliveryAddress?.city}</p>
-                        <p>📱 {order.deliveryAddress?.phone}</p>
+                        <p><FiPhone className="inline-icon" /> {order.deliveryAddress?.phone}</p>
                       </div>
                       
                       <div className="order-items">
-                        <h4>🛒 Items ({order.items?.length})</h4>
+                        <h4><RiShoppingBag3Line className="inline-icon" /> Items ({order.items?.length})</h4>
                         <div className="items-list">
                           {order.items?.map((item, index) => (
                             <span key={index} className="item-tag">
@@ -354,7 +371,7 @@ const DeliveryPartnerDashboard = () => {
                         className="accept-btn"
                         onClick={() => acceptOrder(order._id)}
                       >
-                        ✅ Accept Order
+                        <FiCheck className="btn-icon" /> Accept Order
                       </button>
                     </div>
                   </div>
@@ -370,17 +387,17 @@ const DeliveryPartnerDashboard = () => {
         <div className="dashboard-content">
           <div className="deliveries-section">
             <div className="section-header">
-              <h2>🚚 My Deliveries</h2>
+              <h2><MdDeliveryDining className="section-icon" /> My Deliveries</h2>
               <div className="header-actions">
                 <button className="refresh-btn" onClick={fetchDashboardData}>
-                  🔄 Refresh
+                  <FiRefreshCw className="btn-icon" /> Refresh
                 </button>
               </div>
             </div>
             
             {myDeliveries.length === 0 ? (
               <div className="empty-state">
-                <div className="empty-icon">🚚</div>
+                <div className="empty-icon"><MdDeliveryDining /></div>
                 <h3>No deliveries yet!</h3>
                 <p>Your accepted and completed deliveries will appear here.</p>
               </div>
@@ -405,15 +422,15 @@ const DeliveryPartnerDashboard = () => {
                     
                     <div className="delivery-details">
                       <div className="restaurant-info">
-                        <h4>🏪 {delivery.restaurant?.name}</h4>
+                        <h4><BiRestaurant className="inline-icon" /> {delivery.restaurant?.name}</h4>
                         <p>{delivery.restaurant?.address}</p>
                       </div>
                       
                       <div className="customer-info">
-                        <h4>👤 Customer</h4>
+                        <h4><BiUser className="inline-icon" /> Customer</h4>
                         <p>{delivery.deliveryAddress?.name}</p>
                         <p>{delivery.deliveryAddress?.street}, {delivery.deliveryAddress?.city}</p>
-                        <p>📱 {delivery.deliveryAddress?.phone}</p>
+                        <p><FiPhone className="inline-icon" /> {delivery.deliveryAddress?.phone}</p>
                       </div>
                       
                       <div className="delivery-earnings">
@@ -428,7 +445,7 @@ const DeliveryPartnerDashboard = () => {
                           className="action-btn pickup"
                           onClick={() => updateDeliveryStatus(delivery._id, 'picked_up')}
                         >
-                          📦 Mark as Picked Up
+                          <FiPackage className="btn-icon" /> Mark as Picked Up
                         </button>
                       )}
                       
@@ -437,7 +454,7 @@ const DeliveryPartnerDashboard = () => {
                           className="action-btn delivering"
                           onClick={() => updateDeliveryStatus(delivery._id, 'out_for_delivery')}
                         >
-                          🚚 Out for Delivery
+                          <MdDeliveryDining className="btn-icon" /> Out for Delivery
                         </button>
                       )}
                       
@@ -446,7 +463,7 @@ const DeliveryPartnerDashboard = () => {
                           className="action-btn delivered"
                           onClick={() => updateDeliveryStatus(delivery._id, 'delivered')}
                         >
-                          ✅ Mark as Delivered
+                          <FiCheck className="btn-icon" /> Mark as Delivered
                         </button>
                       )}
                     </div>
@@ -463,10 +480,10 @@ const DeliveryPartnerDashboard = () => {
         <div className="dashboard-content">
           <div className="earnings-section">
             <div className="section-header">
-              <h2>💰 Earnings</h2>
+              <h2><FiDollarSign className="section-icon" /> Earnings</h2>
               <div className="header-actions">
                 <button className="refresh-btn" onClick={fetchDashboardData}>
-                  🔄 Refresh
+                  <FiRefreshCw className="btn-icon" /> Refresh
                 </button>
               </div>
             </div>
@@ -493,7 +510,7 @@ const DeliveryPartnerDashboard = () => {
             
             {earnings.length === 0 ? (
               <div className="empty-state">
-                <div className="empty-icon">💰</div>
+                <div className="empty-icon"><FiDollarSign /></div>
                 <h3>No earnings yet!</h3>
                 <p>Start accepting deliveries to see your earnings here.</p>
               </div>
