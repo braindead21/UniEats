@@ -15,7 +15,15 @@ router.post('/', optionalAuth, async (req, res) => {
       restaurantId,
       deliveryAddress,
       paymentMethod,
-      specialInstructions
+      specialInstructions,
+      deliveryTimeSlot,
+      customDeliveryTime,
+      tipAmount,
+      contactlessDelivery,
+      deliveryInstructions,
+      alternatePhone,
+      notifications,
+      pricing: clientPricing
     } = req.body;
 
     // Validate required fields
@@ -63,13 +71,13 @@ router.post('/', optionalAuth, async (req, res) => {
     for (const item of items) {
       console.log('Processing item:', item);
       // Find the menu item
-      const menuItem = await MenuItem.findById(item.menuItemId);
+      const menuItem = await MenuItem.findById(item.menuItemId || item.itemId);
       console.log('Found menu item:', menuItem);
       if (!menuItem) {
-        console.log('Menu item not found:', item.menuItemId);
+        console.log('Menu item not found:', item.menuItemId || item.itemId);
         return res.status(404).json({
           success: false,
-          message: `Menu item with ID ${item.menuItemId} not found`
+          message: `Menu item with ID ${item.menuItemId || item.itemId} not found`
         });
       }
 
@@ -97,16 +105,19 @@ router.post('/', optionalAuth, async (req, res) => {
       });
     }
 
-    // Calculate pricing
+    // Calculate pricing with new fields
     const tax = Math.round(subtotal * 0.05); // 5% tax
-    const deliveryFee = subtotal > 300 ? 0 : 40; // Free delivery above ₹300
-    const platformFee = Math.round(subtotal * 0.02); // 2% platform fee
-    const total = subtotal + tax + deliveryFee + platformFee;
+    const deliveryFee = subtotal > 200 ? 0 : 40; // Free delivery above ₹200
+    const platformFee = 5; // Fixed platform fee
+    const tip = tipAmount || 0;
+    const codCharges = paymentMethod === 'cod' ? 10 : 0;
+    const discount = clientPricing?.discount || 0;
+    const total = subtotal + tax + deliveryFee + platformFee + tip + codCharges - discount;
 
     // Generate unique order number
     const orderNumber = 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5).toUpperCase();
 
-    // Create order
+    // Create order with new fields
     const order = new Order({
       orderNumber,
       user: req.user ? req.user._id : null, // Allow null for guest orders
@@ -117,14 +128,32 @@ router.post('/', optionalAuth, async (req, res) => {
         tax,
         deliveryFee,
         platformFee,
+        discount: {
+          amount: discount,
+          couponCode: req.body.couponCode || '',
+          description: 'Discount applied'
+        },
         total
       },
       deliveryAddress,
       paymentInfo: {
         method: paymentMethod,
-        status: paymentMethod === 'cod' ? 'pending' : 'pending'
+        status: paymentMethod === 'cod' ? 'pending' : 'pending',
+        transactionId: req.body.paymentId || null
       },
       specialInstructions: specialInstructions || '',
+      deliveryTimeSlot: deliveryTimeSlot || 'ASAP (30-45 mins)',
+      customDeliveryTime: customDeliveryTime || null,
+      tipAmount: tip,
+      contactlessDelivery: contactlessDelivery || false,
+      deliveryInstructions: deliveryInstructions || deliveryAddress.instructions || '',
+      alternatePhone: alternatePhone || deliveryAddress.alternatePhone || null,
+      codHandlingCharges: codCharges,
+      notifications: notifications || {
+        sms: true,
+        whatsapp: true,
+        email: true
+      },
       estimatedDeliveryTime: new Date(Date.now() + 45 * 60 * 1000), // 45 minutes from now
       tracking: {
         orderPlaced: new Date()

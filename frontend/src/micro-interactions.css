@@ -1,0 +1,79 @@
+/* ============================================
+   UNIVERSAL RIPPLE EFFECT
+   Add satisfying click feedback to all buttons
+   ============================================ */
+
+/* Apply to all interactive elements */
+.btn,
+button,
+.cuisine-chip,
+.rating-option,
+.dietary-option,
+.sort-option,
+.delivery-time-option,
+.price-quick-select button,
+.apply-filters-btn,
+.clear-filters-btn,
+[role="button"] {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ripple animation */
+.btn::before,
+button::before,
+.cuisine-chip::before,
+.rating-option::before,
+.dietary-option::before,
+.sort-option::before,
+.delivery-time-option::before,
+.price-quick-select button::before,
+.apply-filters-btn::before,
+.clear-filters-btn::before,
+[role="button"]::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease-out, height 0.6s ease-out;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Active state - trigger ripple */
+.btn:active::before,
+button:active::before,
+.cuisine-chip:active::before,
+.rating-option:active::before,
+.dietary-option:active::before,
+.sort-option:active::before,
+.delivery-time-option:active::before,
+.price-quick-select button:active::before,
+.apply-filters-btn:active::before,
+.clear-filters-btn:active::before,
+[role="button"]:active::before {
+  width: 400px;
+  height: 400px;
+  transition: width 0s, height 0s;
+}
+
+/* Ensure content stays above ripple */
+.btn > *,
+button > *,
+.cuisine-chip > *,
+.rating-option > *,
+.dietary-option > *,
+.sort-option > *,
+.delivery-time-option > *,
+.price-quick-select button > *,
+.apply-filters-btn > *,
+.clear-filters-btn > *,
+[role="button"] > * {
+  position: relative;
+  z-index: 1;
+}

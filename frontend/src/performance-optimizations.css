@@ -1,0 +1,141 @@
+/* ========================================
+   PERFORMANCE OPTIMIZATIONS
+   Reduces paint/layout cost during scroll
+   ======================================== */
+
+/* Simplify box-shadows to reduce paint cost */
+.restaurant-card-modern,
+.food-card-modern {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  transition: transform 0.2s ease !important;
+  will-change: transform;
+}
+
+.restaurant-card-modern:hover,
+.food-card-modern:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
+  transform: translateY(-4px);
+}
+
+/* Optimize image rendering */
+.restaurant-img-modern,
+.food-img-modern {
+  will-change: auto;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Add containment for better layout performance */
+.restaurant-card-modern,
+.food-card-modern {
+  contain: layout style paint;
+}
+
+.restaurant-grid,
+.food-grid-modern {
+  contain: layout;
+}
+
+/* Reduce animation complexity */
+.scroll-in {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  transition: opacity 0.3s ease, transform 0.3s ease !important;
+}
+
+/* Simplify cart animations */
+.cart-sidebar {
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1) !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Reduce modal blur for better performance */
+.modal-overlay {
+  backdrop-filter: none !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Optimize buttons */
+.add-to-cart-btn-modern,
+.quantity-btn,
+.checkout-btn {
+  transition: transform 0.15s ease, background 0.15s ease !important;
+  will-change: transform;
+}
+
+/* Remove expensive gradients on scroll-heavy elements */
+.hero-badge,
+.restaurant-tag-modern,
+.food-badge {
+  background: rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: none !important;
+}
+
+/* Optimize search dropdown */
+.search-results-dropdown {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  backdrop-filter: none !important;
+}
+
+/* Reduce expensive filters */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Force GPU acceleration only where needed */
+.cart-sidebar,
+.modal,
+.search-results-dropdown {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Remove will-change from static elements */
+.hero-content,
+.hero-title,
+.hero-subtitle {
+  will-change: auto !important;
+}
+
+/* Simplify all transitions to only transform and opacity */
+* {
+  transition-property: transform, opacity !important;
+  transition-duration: 0.2s !important;
+  transition-timing-function: ease !important;
+}
+
+/* Exception for critical interactive elements */
+button,
+a,
+input {
+  transition-property: transform, opacity, background-color !important;
+}
+
+/* Disable animations on low-end devices */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Optimize hero section specifically */
+.hero {
+  contain: layout style;
+}
+
+/* Prevent layout shifts */
+.restaurant-img-modern,
+.food-img-modern {
+  aspect-ratio: 4/3;
+  object-fit: cover;
+}
+
+/* Reduce repaints on scroll */
+.app-header {
+  contain: layout style;
+  will-change: auto;
+}

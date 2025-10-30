@@ -1,0 +1,399 @@
+/* Dark Mode Toggle Styles */
+
+.dark-mode-toggle {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 100;
+}
+
+.dark-mode-toggle-fixed {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+}
+
+.dark-mode-toggle-relative {
+  position: relative;
+}
+
+/* Toggle Track */
+.toggle-track {
+  width: 68px;
+  height: 36px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 18px;
+  position: relative;
+  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.dark-mode-toggle.dark .toggle-track {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+.dark-mode-toggle:hover .toggle-track {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Background Animation */
+.toggle-background {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px;
+}
+
+/* Stars (Dark Mode) */
+.star {
+  position: absolute;
+  color: white;
+  font-size: 8px;
+  opacity: 0;
+  animation: twinkle 2s ease-in-out infinite;
+}
+
+.dark-mode-toggle.dark .star {
+  opacity: 1;
+}
+
+.star-1 {
+  top: 6px;
+  left: 10px;
+  animation-delay: 0s;
+}
+
+.star-2 {
+  top: 14px;
+  left: 20px;
+  font-size: 6px;
+  animation-delay: 0.3s;
+}
+
+.star-3 {
+  top: 24px;
+  left: 12px;
+  font-size: 7px;
+  animation-delay: 0.6s;
+}
+
+.star-4 {
+  top: 8px;
+  right: 18px;
+  font-size: 5px;
+  animation-delay: 0.9s;
+}
+
+.star-5 {
+  top: 20px;
+  right: 10px;
+  font-size: 6px;
+  animation-delay: 1.2s;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* Clouds (Light Mode) */
+.cloud {
+  position: absolute;
+  font-size: 12px;
+  opacity: 0;
+  animation: float 3s ease-in-out infinite;
+}
+
+.dark-mode-toggle.light .cloud {
+  opacity: 0.6;
+}
+
+.cloud-1 {
+  top: 6px;
+  left: 8px;
+  animation-delay: 0s;
+}
+
+.cloud-2 {
+  top: 18px;
+  right: 8px;
+  font-size: 10px;
+  animation-delay: 1.5s;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Toggle Thumb */
+.toggle-thumb {
+  width: 28px;
+  height: 28px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.dark-mode-toggle.dark .toggle-thumb {
+  transform: translateX(32px);
+  background: #1e293b;
+}
+
+.dark-mode-toggle:hover .toggle-thumb {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Theme Icons */
+.theme-icon {
+  font-size: 16px;
+  transition: all 0.3s;
+}
+
+.sun {
+  color: #fbbf24;
+  animation: spinSun 20s linear infinite;
+}
+
+.moon {
+  color: #fbbf24;
+}
+
+@keyframes spinSun {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animation State */
+.dark-mode-toggle.animating .toggle-thumb {
+  animation: bounce 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateX(0) scale(1);
+  }
+  25% {
+    transform: translateX(8px) scale(1.1);
+  }
+  50% {
+    transform: translateX(16px) scale(0.9);
+  }
+  75% {
+    transform: translateX(24px) scale(1.05);
+  }
+}
+
+.dark-mode-toggle.animating.dark .toggle-thumb {
+  animation: bounceRight 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes bounceRight {
+  0%,
+  100% {
+    transform: translateX(32px) scale(1);
+  }
+  25% {
+    transform: translateX(24px) scale(1.1);
+  }
+  50% {
+    transform: translateX(16px) scale(0.9);
+  }
+  75% {
+    transform: translateX(8px) scale(1.05);
+  }
+}
+
+.dark-mode-toggle.animating .theme-icon {
+  animation: iconPulse 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes iconPulse {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.3) rotate(180deg);
+  }
+}
+
+/* Focus States */
+.dark-mode-toggle:focus {
+  outline: none;
+}
+
+.dark-mode-toggle:focus .toggle-track {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.dark-mode-toggle.dark:focus .toggle-track {
+  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3);
+}
+
+/* Tooltip */
+.dark-mode-toggle::before {
+  content: attr(title);
+  position: absolute;
+  bottom: calc(100% + 12px);
+  right: 0;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s;
+  z-index: 1000;
+}
+
+.dark-mode-toggle::after {
+  content: "";
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 18px;
+  border: 6px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s;
+}
+
+.dark-mode-toggle:hover::before,
+.dark-mode-toggle:hover::after {
+  opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dark-mode-toggle-fixed {
+    bottom: 24px;
+    right: 24px;
+  }
+
+  .toggle-track {
+    width: 60px;
+    height: 32px;
+  }
+
+  .toggle-thumb {
+    width: 24px;
+    height: 24px;
+  }
+
+  .dark-mode-toggle.dark .toggle-thumb {
+    transform: translateX(28px);
+  }
+
+  .theme-icon {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dark-mode-toggle-fixed {
+    bottom: 20px;
+    right: 20px;
+  }
+
+  .dark-mode-toggle:hover::before,
+  .dark-mode-toggle:hover::after {
+    display: none;
+  }
+}
+
+/* Accessibility - Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .toggle-track,
+  .toggle-thumb,
+  .theme-icon,
+  .star,
+  .cloud {
+    animation: none;
+    transition: none;
+  }
+
+  .dark-mode-toggle.animating .toggle-thumb,
+  .dark-mode-toggle.animating .theme-icon {
+    animation: none;
+  }
+}
+
+/* Enhanced Hover Effects */
+.dark-mode-toggle:hover .toggle-track {
+  transform: scale(1.05);
+}
+
+.dark-mode-toggle:active .toggle-track {
+  transform: scale(0.95);
+}
+
+/* Glow Effect */
+.dark-mode-toggle.light .toggle-track {
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3),
+    0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+.dark-mode-toggle.dark .toggle-track {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 20px rgba(251, 191, 36, 0.2);
+}
+
+.dark-mode-toggle:hover.light .toggle-track {
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4),
+    0 0 30px rgba(59, 130, 246, 0.2);
+}
+
+.dark-mode-toggle:hover.dark .toggle-track {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), 0 0 30px rgba(251, 191, 36, 0.3);
+}
+
+/* Loading State (optional) */
+.dark-mode-toggle.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.dark-mode-toggle.loading .toggle-thumb {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

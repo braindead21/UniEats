@@ -1,0 +1,520 @@
+/* ============================================
+   VIEWPORT FIT OPTIMIZATIONS
+   Ensures auth pages fit without scrolling
+   ============================================ */
+
+/* Optimize page container for viewport fit */
+.auth-page,
+.admin-login-page,
+.role-login-page {
+  min-height: 100vh;
+  padding: 1rem !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* Login pages can have max-height constraint */
+.auth-page:not(.signup-container):not(.has-multi-step),
+.admin-login-page:not(.signup-container):not(.has-multi-step),
+.role-login-page:not(.signup-container):not(.has-multi-step) {
+  max-height: 100vh;
+}
+
+/* Signup pages need to scroll freely for multi-step forms */
+.signup-container,
+.role-login-page.signup-page,
+.role-login-page.has-multi-step {
+  max-height: none !important;
+  min-height: 100vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-bottom: 3rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Optimize container spacing */
+.admin-container,
+.role-container,
+.auth-container {
+  max-width: 480px;
+  margin: auto;
+}
+
+/* Reduce card padding for better fit */
+.admin-card,
+.role-card,
+.auth-card {
+  padding: 1.5rem 1.75rem !important;
+  border-radius: 24px !important;
+  margin: 0.5rem 0;
+}
+
+/* Optimize header spacing */
+.admin-header,
+.role-header,
+.auth-header {
+  margin-bottom: 1.25rem !important;
+}
+
+.admin-header-section {
+  margin-bottom: 1rem !important;
+}
+
+/* Reduce back button size */
+.back-btn,
+.back-home,
+.admin-back-btn {
+  padding: 0.5rem 1rem !important;
+  font-size: 0.85rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+/* Optimize logo/badge spacing */
+.admin-logo-container,
+.role-badge {
+  margin-bottom: 0.75rem !important;
+  padding: 0.4rem 1rem !important;
+}
+
+.shield-wrapper {
+  width: 50px !important;
+  height: 50px !important;
+}
+
+/* Reduce title sizes */
+.admin-title,
+.role-title,
+.auth-header h1 {
+  font-size: 2rem !important;
+  margin: 0.5rem 0 !important;
+  line-height: 1.1 !important;
+}
+
+.admin-subtitle,
+.role-subtitle,
+.auth-header p {
+  font-size: 0.95rem !important;
+  margin: 0.5rem 0 0 !important;
+}
+
+/* Optimize form spacing */
+.admin-form,
+.role-form,
+.auth-form {
+  margin-top: 0.5rem;
+}
+
+.form-group {
+  margin-bottom: 1rem !important;
+}
+
+/* Reduce input padding */
+.form-control,
+.form-group input,
+.form-group select,
+.form-group textarea,
+.admin-input {
+  padding: 0.75rem 1rem !important;
+  font-size: 0.95rem !important;
+  border-radius: 12px !important;
+}
+
+/* Optimize label spacing */
+.form-group label,
+.form-label {
+  margin-bottom: 0.4rem !important;
+  font-size: 0.875rem !important;
+}
+
+/* Reduce button padding */
+.submit-btn,
+.auth-submit-btn,
+.admin-submit-btn,
+.btn-primary {
+  padding: 0.85rem 1.5rem !important;
+  font-size: 0.95rem !important;
+  border-radius: 12px !important;
+}
+
+/* Optimize error/success messages */
+.error-message,
+.success-message,
+.admin-error-message {
+  padding: 0.75rem 1rem !important;
+  margin-bottom: 1rem !important;
+  font-size: 0.875rem !important;
+  border-radius: 10px !important;
+}
+
+/* Reduce security badge spacing */
+.security-badge {
+  padding: 0.75rem 1rem !important;
+  margin-bottom: 1rem !important;
+  border-radius: 12px !important;
+}
+
+.security-badge h3 {
+  font-size: 0.875rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.security-badge p {
+  font-size: 0.75rem !important;
+}
+
+/* Optimize security notice */
+.security-notice {
+  padding: 0.75rem 1rem !important;
+  margin-top: 1rem !important;
+  border-radius: 10px !important;
+}
+
+.security-notice p {
+  font-size: 0.75rem !important;
+  line-height: 1.4 !important;
+}
+
+/* Optimize other logins section */
+.other-logins {
+  margin-top: 1.25rem !important;
+}
+
+.divider {
+  margin: 1rem 0 !important;
+}
+
+.divider span {
+  font-size: 0.8rem !important;
+}
+
+.role-links-grid {
+  gap: 0.75rem !important;
+}
+
+.role-link-modern {
+  padding: 0.75rem !important;
+  border-radius: 10px !important;
+}
+
+.role-link-modern .role-icon {
+  font-size: 1.25rem !important;
+}
+
+.role-link-modern .role-name {
+  font-size: 0.875rem !important;
+}
+
+.role-link-modern .role-desc {
+  font-size: 0.75rem !important;
+}
+
+/* Optimize auth footer */
+.auth-footer {
+  margin-top: 1.25rem !important;
+  padding-top: 1.25rem !important;
+}
+
+.auth-footer p {
+  font-size: 0.875rem !important;
+}
+
+/* Optimize multi-step form indicators */
+.step-indicator {
+  margin-bottom: 1.25rem !important;
+  padding: 1rem 0 !important;
+  gap: 0.75rem !important;
+}
+
+.step-circle {
+  width: 38px !important;
+  height: 38px !important;
+  font-size: 0.95rem !important;
+}
+
+.step-line {
+  width: 45px !important;
+}
+
+.step-navigation {
+  margin-top: 1.25rem !important;
+  gap: 0.75rem !important;
+}
+
+.btn-secondary,
+.btn-back,
+.btn-next {
+  padding: 0.85rem 1.5rem !important;
+  font-size: 0.9rem !important;
+  border-radius: 12px !important;
+}
+
+/* Reduce floating elements for cleaner view */
+.particles-container,
+.floating-icons-container {
+  opacity: 0.6;
+}
+
+.glow-orb {
+  opacity: 0.15 !important;
+}
+
+/* Optimize card wrapper */
+.admin-card-wrapper,
+.role-card-wrapper {
+  margin-top: 0.5rem;
+}
+
+.admin-login-card,
+.role-login-card {
+  padding: 1.5rem !important;
+}
+
+/* Reduce animation distances for stability */
+.admin-card:hover,
+.role-card:hover,
+.auth-card:hover {
+  transform: translateY(-2px) !important;
+}
+
+/* Optimize grid overlays for less distraction */
+.admin-grid-overlay,
+.role-grid-overlay {
+  opacity: 0.25 !important;
+}
+
+/* Ensure content fits viewport */
+@media (max-height: 800px) {
+  .auth-page,
+  .admin-login-page,
+  .role-login-page {
+    padding: 0.75rem !important;
+  }
+
+  .admin-card,
+  .role-card,
+  .auth-card {
+    padding: 1.25rem 1.5rem !important;
+  }
+
+  .admin-title,
+  .role-title,
+  .auth-header h1 {
+    font-size: 1.75rem !important;
+  }
+
+  .form-group {
+    margin-bottom: 0.85rem !important;
+  }
+
+  .admin-header,
+  .role-header,
+  .auth-header {
+    margin-bottom: 1rem !important;
+  }
+
+  .security-badge,
+  .security-notice {
+    display: none !important;
+  }
+
+  .other-logins {
+    margin-top: 1rem !important;
+  }
+
+  .step-indicator {
+    margin-bottom: 1rem !important;
+    padding: 0.75rem 0 !important;
+  }
+}
+
+/* Extra compact for very short viewports */
+@media (max-height: 700px) {
+  .auth-page,
+  .admin-login-page,
+  .role-login-page {
+    padding: 0.5rem !important;
+    align-items: flex-start;
+  }
+
+  .admin-card,
+  .role-card,
+  .auth-card {
+    padding: 1rem 1.25rem !important;
+    margin: 0.25rem 0;
+  }
+
+  .admin-title,
+  .role-title,
+  .auth-header h1 {
+    font-size: 1.5rem !important;
+  }
+
+  .admin-subtitle,
+  .role-subtitle,
+  .auth-header p {
+    font-size: 0.85rem !important;
+  }
+
+  .form-group {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .form-control,
+  .form-group input,
+  .admin-input {
+    padding: 0.65rem 0.85rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  .submit-btn,
+  .auth-submit-btn,
+  .admin-submit-btn {
+    padding: 0.75rem 1.25rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  .admin-header,
+  .role-header,
+  .auth-header {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .admin-logo-container {
+    display: none !important;
+  }
+
+  .role-badge {
+    padding: 0.35rem 0.85rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  .back-btn,
+  .back-home,
+  .admin-back-btn {
+    padding: 0.4rem 0.85rem !important;
+    font-size: 0.8rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .auth-footer {
+    margin-top: 1rem !important;
+    padding-top: 1rem !important;
+  }
+
+  .other-logins {
+    margin-top: 1rem !important;
+  }
+
+  .role-links-grid {
+    display: none !important;
+  }
+
+  .step-indicator {
+    margin-bottom: 0.75rem !important;
+    padding: 0.5rem 0 !important;
+    gap: 0.5rem !important;
+  }
+
+  .step-circle {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.85rem !important;
+  }
+
+  .step-line {
+    width: 30px !important;
+  }
+
+  .step-navigation {
+    margin-top: 1rem !important;
+  }
+}
+
+/* Landscape mobile optimization */
+@media (max-height: 600px) and (orientation: landscape) {
+  .auth-page,
+  .admin-login-page,
+  .role-login-page {
+    padding: 0.5rem !important;
+    align-items: flex-start;
+    overflow-y: auto;
+  }
+
+  .admin-container,
+  .role-container,
+  .auth-container {
+    margin: 0.5rem auto;
+  }
+
+  .admin-card,
+  .role-card,
+  .auth-card {
+    padding: 1rem !important;
+  }
+
+  .form-group {
+    margin-bottom: 0.65rem !important;
+  }
+
+  .glow-orb,
+  .particles-container,
+  .floating-icons-container {
+    display: none !important;
+  }
+}
+
+/* Ensure scrolling works when content exceeds viewport */
+.auth-page::-webkit-scrollbar,
+.admin-login-page::-webkit-scrollbar,
+.role-login-page::-webkit-scrollbar {
+  width: 6px;
+}
+
+.auth-page::-webkit-scrollbar-track,
+.admin-login-page::-webkit-scrollbar-track,
+.role-login-page::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.auth-page::-webkit-scrollbar-thumb,
+.admin-login-page::-webkit-scrollbar-thumb,
+.role-login-page::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 26, 0.5);
+  border-radius: 3px;
+}
+
+.auth-page::-webkit-scrollbar-thumb:hover,
+.admin-login-page::-webkit-scrollbar-thumb:hover,
+.role-login-page::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 107, 26, 0.7);
+}
+
+/* ============================================
+   EMERGENCY OVERRIDE FOR SIGNUP PAGES
+   Absolutely ensure multi-step forms can scroll
+   ============================================ */
+
+/* Force scrolling on all signup pages */
+.role-login-page.has-multi-step,
+.delivery-theme.has-multi-step,
+.restaurant-theme.has-multi-step,
+.student-theme.has-multi-step {
+  max-height: none !important;
+  height: auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* Ensure container doesn't clip content */
+.has-multi-step .role-container {
+  max-height: none !important;
+  height: auto !important;
+}
+
+/* Ensure card can expand */
+.has-multi-step .role-login-card,
+.has-multi-step .signup-card {
+  max-height: none !important;
+  height: auto !important;
+}

@@ -153,11 +153,60 @@ const orderSchema = new mongoose.Schema({
     paidAt: Date,
     refundId: String,
     refundedAt: Date,
-    refundAmount: Number
+    refundAmount: Number,
+    // Razorpay specific fields
+    razorpay: {
+      orderId: String,           // Razorpay order ID
+      paymentId: String,         // Razorpay payment ID
+      signature: String          // Razorpay signature for verification
+    }
   },
   specialInstructions: {
     type: String,
     maxlength: [200, 'Special instructions cannot be more than 200 characters']
+  },
+  // New fields for enhanced checkout
+  deliveryTimeSlot: {
+    type: String,
+    default: 'ASAP (30-45 mins)'
+  },
+  customDeliveryTime: {
+    type: String
+  },
+  tipAmount: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  contactlessDelivery: {
+    type: Boolean,
+    default: false
+  },
+  deliveryInstructions: {
+    type: String,
+    maxlength: [200, 'Delivery instructions cannot be more than 200 characters']
+  },
+  alternatePhone: {
+    type: String,
+    match: [/^\d{10}$/, 'Please provide a valid 10-digit phone number']
+  },
+  codHandlingCharges: {
+    type: Number,
+    default: 0
+  },
+  notifications: {
+    sms: {
+      type: Boolean,
+      default: true
+    },
+    whatsapp: {
+      type: Boolean,
+      default: true
+    },
+    email: {
+      type: Boolean,
+      default: true
+    }
   },
   rating: {
     food: { type: Number, min: 1, max: 5 },

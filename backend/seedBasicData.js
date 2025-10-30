@@ -22,15 +22,14 @@ const seedData = async () => {
     await Order.deleteMany({});
     console.log('🗑️ Cleared existing data');
 
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash('password123', salt);
+    // Note: Password will be hashed automatically by the User model's pre-save hook
+    const plainPassword = 'password123';
 
     // Create Admin
     const admin = await User.create({
       name: 'Admin User',
       email: 'admin@unieats.com',
-      password: hashedPassword,
+      password: plainPassword,
       role: 'admin',
       phone: '+91 98765 43210',
       isVerified: true,
@@ -42,7 +41,7 @@ const seedData = async () => {
     const restaurantOwner = await User.create({
       name: 'Restaurant Owner',
       email: 'owner@restaurant.com',
-      password: hashedPassword,
+      password: plainPassword,
       role: 'restaurant_owner',
       phone: '+91 98765 43220',
       isVerified: true,
@@ -60,7 +59,7 @@ const seedData = async () => {
     const deliveryPartner = await User.create({
       name: 'Delivery Partner',
       email: 'delivery@partner.com',
-      password: hashedPassword,
+      password: plainPassword,
       role: 'delivery_partner',
       phone: '+91 98765 43230',
       collegeId: 'DEL001',
@@ -84,7 +83,7 @@ const seedData = async () => {
       {
         name: 'John Doe',
         email: 'john@student.com',
-        password: hashedPassword,
+        password: plainPassword,
         role: 'student',
         phone: '+91 98765 43211',
         collegeId: 'STU001',
@@ -94,7 +93,7 @@ const seedData = async () => {
       {
         name: 'Jane Smith',
         email: 'jane@student.com',
-        password: hashedPassword,
+        password: plainPassword,
         role: 'student',
         phone: '+91 98765 43212',
         collegeId: 'STU002',

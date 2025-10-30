@@ -1,0 +1,272 @@
+/* ============================================
+   COMPACT SIGNUP LAYOUT
+   Makes 4-step signup pages fit better without scrolling
+   Applied to: Restaurant & Delivery Signup
+   ============================================ */
+
+/* Reduce page padding */
+.restaurant-theme.has-multi-step,
+.delivery-theme.has-multi-step {
+  padding: 12px !important;
+}
+
+/* Compact container */
+.restaurant-theme .role-container,
+.delivery-theme .role-container {
+  max-width: 440px !important;
+}
+
+/* Reduce header spacing */
+.restaurant-theme .role-header-section,
+.delivery-theme .role-header-section {
+  margin-bottom: 16px !important;
+}
+
+/* Smaller back button */
+.restaurant-theme .role-back-btn,
+.delivery-theme .role-back-btn {
+  padding: 8px 18px !important;
+  font-size: 0.85rem !important;
+  margin-bottom: 14px !important;
+}
+
+/* Compact icon */
+.restaurant-theme .role-main-icon,
+.delivery-theme .role-main-icon {
+  width: 56px !important;
+  height: 56px !important;
+  margin-bottom: 10px !important;
+}
+
+.restaurant-theme .icon-circle svg,
+.delivery-theme .icon-circle svg {
+  width: 32px !important;
+  height: 32px !important;
+}
+
+/* Smaller title */
+.restaurant-theme .role-title,
+.delivery-theme .role-title {
+  font-size: 1.8rem !important;
+  margin-bottom: 6px !important;
+}
+
+.restaurant-theme .role-subtitle,
+.delivery-theme .role-subtitle {
+  font-size: 0.85rem !important;
+}
+
+/* Compact card */
+.restaurant-theme .role-login-card,
+.delivery-theme .role-login-card {
+  padding: 20px 24px !important;
+  border-radius: 20px !important;
+}
+
+/* Smaller progress indicator */
+.restaurant-theme .signup-progress,
+.delivery-theme .signup-progress {
+  margin-bottom: 20px !important;
+  padding: 0 4px !important;
+}
+
+.restaurant-theme .step-number,
+.delivery-theme .step-number {
+  width: 36px !important;
+  height: 36px !important;
+  font-size: 13px !important;
+}
+
+.restaurant-theme .progress-step span,
+.delivery-theme .progress-step span {
+  font-size: 10px !important;
+}
+
+/* Compact step header */
+.restaurant-theme .step-header,
+.delivery-theme .step-header {
+  margin-bottom: 16px !important;
+}
+
+.restaurant-theme .step-header h3,
+.delivery-theme .step-header h3 {
+  font-size: 17px !important;
+  margin-bottom: 4px !important;
+}
+
+.restaurant-theme .step-header p,
+.delivery-theme .step-header p {
+  font-size: 12px !important;
+}
+
+/* Reduce form grid spacing */
+.restaurant-theme .form-grid,
+.delivery-theme .form-grid {
+  gap: 14px !important;
+  margin-bottom: 16px !important;
+}
+
+/* Compact form groups */
+.restaurant-theme .role-form-group,
+.delivery-theme .role-form-group {
+  margin-bottom: 14px !important;
+}
+
+/* Smaller labels */
+.restaurant-theme .role-label,
+.delivery-theme .role-label {
+  font-size: 0.85rem !important;
+  margin-bottom: 6px !important;
+  gap: 6px !important;
+}
+
+.restaurant-theme .label-icon,
+.delivery-theme .label-icon {
+  font-size: 1rem !important;
+}
+
+/* Compact inputs */
+.restaurant-theme .role-input,
+.delivery-theme .role-input {
+  padding: 10px 14px !important;
+  font-size: 0.9rem !important;
+  border-radius: 10px !important;
+}
+
+.restaurant-theme .role-input.textarea,
+.delivery-theme .role-input.textarea {
+  min-height: 60px !important;
+  padding: 10px 14px !important;
+}
+
+/* Compact password toggle */
+.restaurant-theme .role-password-toggle,
+.delivery-theme .role-password-toggle {
+  padding: 6px !important;
+  right: 12px !important;
+}
+
+.restaurant-theme .role-password-toggle svg,
+.delivery-theme .role-password-toggle svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+/* Compact password hint */
+.restaurant-theme .password-hint,
+.delivery-theme .password-hint {
+  padding: 10px 12px !important;
+  margin-top: -6px !important;
+  border-radius: 8px !important;
+}
+
+.restaurant-theme .password-hint small,
+.delivery-theme .password-hint small {
+  font-size: 11px !important;
+}
+
+/* Smaller step buttons */
+.restaurant-theme .step-buttons,
+.delivery-theme .step-buttons {
+  gap: 10px !important;
+  margin-top: 16px !important;
+}
+
+.restaurant-theme .step-btn,
+.delivery-theme .step-btn {
+  padding: 11px 18px !important;
+  font-size: 13px !important;
+  border-radius: 10px !important;
+  gap: 6px !important;
+}
+
+/* Compact error message */
+.restaurant-theme .role-error-message,
+.delivery-theme .role-error-message {
+  padding: 10px 14px !important;
+  font-size: 0.85rem !important;
+  margin-bottom: 14px !important;
+  border-radius: 10px !important;
+  gap: 8px !important;
+}
+
+.restaurant-theme .error-icon,
+.delivery-theme .error-icon {
+  font-size: 1.2rem !important;
+}
+
+/* Compact submit button */
+.restaurant-theme .role-submit-btn,
+.delivery-theme .role-submit-btn {
+  padding: 12px 24px !important;
+  font-size: 0.95rem !important;
+  border-radius: 10px !important;
+  gap: 8px !important;
+}
+
+/* Compact signup section */
+.restaurant-theme .signup-section,
+.delivery-theme .signup-section {
+  padding: 16px 0 12px !important;
+  margin-top: 16px !important;
+}
+
+.restaurant-theme .signup-section p,
+.delivery-theme .signup-section p {
+  font-size: 12px !important;
+  margin-bottom: 10px !important;
+}
+
+.restaurant-theme .signup-link,
+.delivery-theme .signup-link {
+  padding: 8px 20px !important;
+  font-size: 13px !important;
+  border-radius: 8px !important;
+  gap: 6px !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .restaurant-theme.has-multi-step,
+  .delivery-theme.has-multi-step {
+    padding: 12px !important;
+  }
+
+  .restaurant-theme .role-login-card,
+  .delivery-theme .role-login-card {
+    padding: 18px 20px !important;
+  }
+
+  .restaurant-theme .form-grid,
+  .delivery-theme .form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .restaurant-theme .role-title,
+  .delivery-theme .role-title {
+    font-size: 1.6rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .restaurant-theme .role-login-card,
+  .delivery-theme .role-login-card {
+    padding: 16px 18px !important;
+  }
+
+  .restaurant-theme .step-header h3,
+  .delivery-theme .step-header h3 {
+    font-size: 16px !important;
+  }
+}
+
+/* ============================================
+   PREVENT SCROLL ON LOGIN PAGES (NOT SIGNUP)
+   Keep login pages single-screen
+   ============================================ */
+.restaurant-theme:not(.has-multi-step),
+.delivery-theme:not(.has-multi-step) {
+  max-height: 100vh !important;
+  overflow: hidden !important;
+}

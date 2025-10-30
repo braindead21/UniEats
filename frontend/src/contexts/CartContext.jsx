@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { useToast } from './ToastContext';
 
 console.log('CartContext.jsx loaded - version 2.0');
 
@@ -18,6 +19,16 @@ export const CartProvider = ({ children }) => {
   const [restaurantId, setRestaurantId] = useState(null);
   const [restaurant, setRestaurant] = useState(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [removingItemId, setRemovingItemId] = useState(null); // For removal animation
+  const [updatingItemId, setUpdatingItemId] = useState(null); // For quantity animation
+  
+  // Toast notifications - will be initialized after ToastProvider is available
+  let toast = null;
+  try {
+    toast = useToast();
+  } catch (e) {
+    // Toast context not available yet
+  }
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -62,31 +73,73 @@ export const CartProvider = ({ children }) => {
   }, [cartItems, restaurantId, restaurant]);
 
   const addToCart = (item, quantity = 1) => {
+    // Normalize restaurant ID to string for consistent comparison
+    const itemRestaurantId = String(item.restaurantId || item.restaurant?._id || item.restaurant);
+    const currentRestaurantId = String(restaurantId || '');
+    
+    console.log('🛒 Adding to cart:', { 
+      itemName: item.name,
+      itemId: item._id,
+      itemRestaurantId: itemRestaurantId,
+      currentRestaurantId: currentRestaurantId,
+      areEqual: itemRestaurantId === currentRestaurantId,
+      isDifferent: currentRestaurantId && itemRestaurantId !== currentRestaurantId,
+      currentCartItems: cartItems.length,
+      fullItem: item
+    });
+
     // Check if this item is from a different restaurant
-    if (restaurantId && restaurantId !== item.restaurantId) {
-      const confirmSwitch = window.confirm(
-        'Adding this item will clear your current cart. Do you want to continue?'
-      );
-      if (!confirmSwitch) return false;
-      clearCart();
+    if (currentRestaurantId && itemRestaurantId !== currentRestaurantId) {
+      console.log('🔄 Different restaurant - clearing cart and adding new item');
+      // Automatically clear cart and add new item from different restaurant
+      setRestaurantId(itemRestaurantId);
+      if (item.restaurant) {
+        setRestaurant(item.restaurant);
+      }
+      setCartItems([{ ...item, quantity }]);
+      if (toast) {
+        toast.warning(`Cart cleared! Now ordering from ${item.restaurant?.name || 'new restaurant'}`);
+      }
+      return true;
     }
 
-    setRestaurantId(item.restaurantId);
+    // Set restaurant info if not already set
+    if (!currentRestaurantId) {
+      console.log('🏪 Setting restaurant for first item');
+    }
+    
+    // Always update restaurant info to ensure it's set
+    setRestaurantId(itemRestaurantId);
     if (item.restaurant) {
       setRestaurant(item.restaurant);
     }
 
     setCartItems(prevItems => {
+      console.log('📦 Current cart before adding:', prevItems.map(i => ({ name: i.name, id: i._id })));
+      console.log('🔍 Looking for existing item with _id:', item._id);
       const existingItem = prevItems.find(cartItem => cartItem._id === item._id);
+      console.log('🔍 Found existing item?', existingItem ? existingItem.name : 'No');
       
       if (existingItem) {
-        return prevItems.map(cartItem =>
+        console.log('➕ Incrementing quantity for existing item');
+        const updated = prevItems.map(cartItem =>
           cartItem._id === item._id
             ? { ...cartItem, quantity: cartItem.quantity + quantity }
             : cartItem
         );
+        console.log('📦 Cart after update:', updated.map(i => i.name));
+        if (toast) {
+          toast.success(`Updated ${item.name} quantity`);
+        }
+        return updated;
       } else {
-        return [...prevItems, { ...item, quantity }];
+        console.log('✨ Adding new item to cart');
+        const updated = [...prevItems, { ...item, quantity }];
+        console.log('📦 Cart after adding:', updated.map(i => i.name));
+        if (toast) {
+          toast.success(`${item.name} added to cart!`);
+        }
+        return updated;
       }
     });
 
@@ -94,17 +147,54 @@ export const CartProvider = ({ children }) => {
   };
 
   const removeFromCart = (itemId) => {
-    setCartItems(prevItems => {
-      const updatedItems = prevItems.filter(item => item._id !== itemId);
+    const itemToRemove = cartItems.find(item => item._id === itemId);
+    
+    // Trigger animation
+    setRemovingItemId(itemId);
+    
+    // Remove after animation completes
+    setTimeout(() => {
+      setCartItems(prevItems => {
+        const updatedItems = prevItems.filter(item => item._id !== itemId);
+        
+        // If cart is empty, clear restaurant info
+        if (updatedItems.length === 0) {
+          setRestaurantId(null);
+          setRestaurant(null);
+        }
+        
+        return updatedItems;
+      });
       
-      // If cart is empty, clear restaurant info
-      if (updatedItems.length === 0) {
-        setRestaurantId(null);
-        setRestaurant(null);
+      setRemovingItemId(null);
+      
+      // Show toast with undo option
+      if (toast && itemToRemove) {
+        toast.info(`${itemToRemove.name} removed`, {
+          duration: 4000,
+          action: {
+            label: 'Undo',
+            onClick: () => {
+              // Restore the item
+              setCartItems(prev => {
+                // Check if item already exists (double-add protection)
+                const exists = prev.find(item => item._id === itemToRemove._id);
+                if (exists) return prev;
+                
+                // Add back with restaurant info
+                if (!restaurantId && itemToRemove.restaurantId) {
+                  setRestaurantId(itemToRemove.restaurantId);
+                  setRestaurant(itemToRemove.restaurant);
+                }
+                
+                return [...prev, itemToRemove];
+              });
+              toast.success('Item restored!');
+            }
+          }
+        });
       }
-      
-      return updatedItems;
-    });
+    }, 400); // Match animation duration
   };
 
   const updateQuantity = (itemId, quantity) => {
@@ -112,6 +202,10 @@ export const CartProvider = ({ children }) => {
       removeFromCart(itemId);
       return;
     }
+
+    // Trigger animation
+    setUpdatingItemId(itemId);
+    setTimeout(() => setUpdatingItemId(null), 400);
 
     setCartItems(prevItems =>
       prevItems.map(item =>
@@ -126,6 +220,9 @@ export const CartProvider = ({ children }) => {
     setCartItems([]);
     setRestaurantId(null);
     setRestaurant(null);
+    if (toast) {
+      toast.info('Cart cleared');
+    }
   };
 
   const getCartTotal = () => {
@@ -223,6 +320,8 @@ export const CartProvider = ({ children }) => {
     restaurantId,
     restaurant,
     isCheckingOut,
+    removingItemId,
+    updatingItemId,
     addToCart,
     removeFromCart,
     updateQuantity,

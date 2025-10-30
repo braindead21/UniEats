@@ -1,0 +1,111 @@
+/* ========================================
+   HEADER ANIMATIONS - OPTIMIZED FOR PERFORMANCE
+   ======================================== */
+
+/* Cart Button Optimizations */
+.cart-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.cart-icon {
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.cart-btn:hover .cart-icon {
+  transform: scale(1.1);
+}
+
+/* Cart Badge Optimized */
+.cart-badge-ripple {
+  display: none;
+}
+
+/* User Avatar Optimized */
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8559 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.125rem;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.user-greeting {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 1rem;
+}
+
+/* Logout Button */
+.logout-btn {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #475569 0%, #334155 100%);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.logout-btn:hover {
+  background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.logout-icon {
+  transition: transform 0.3s ease;
+}
+
+.logout-btn:hover .logout-icon {
+  transform: translateX(4px);
+}
+
+/* Shine Effect Optimized */
+.btn-shine {
+  display: none;
+}
+
+/* Dropdown Arrow */
+.dropdown-arrow {
+  transition: transform 0.3s ease;
+  font-size: 0.8em;
+}
+
+.auth-dropdown:hover .dropdown-arrow {
+  transform: translateY(2px);
+}
+
+/* Link Icon */
+.link-icon {
+  font-size: 1.2em;
+  transition: transform 0.3s ease;
+}
+
+.auth-dropdown-link:hover .link-icon {
+  transform: scale(1.15);
+}

@@ -1,0 +1,767 @@
+/* ============================================
+   UNIFIED SIGNUP DESIGN - MATCHES LOGIN
+   Apply same professional design to all signup pages
+   ============================================ */
+
+/* Extend unified login design to signup pages */
+
+/* Multi-step form header - match login header */
+.signup-header-section,
+.role-header-section {
+  text-align: center;
+  margin-bottom: 1.25rem !important;
+}
+
+/* Signup card - same as login */
+.signup-card,
+.role-signup-card {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(30px);
+  border-radius: 24px !important;
+  padding: 1.5rem 1.75rem !important;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25), 0 10px 40px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.signup-card:hover,
+.role-signup-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 35px 100px rgba(0, 0, 0, 0.3), 0 15px 50px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+/* Top border - role-specific */
+.signup-card::before,
+.role-signup-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #ff6b1a 0%, #ff8c42 50%, #ff6b1a 100%);
+  background-size: 300% 100%;
+  animation: gradientSlide 4s ease infinite;
+}
+
+.restaurant-theme .signup-card::before,
+.restaurant-theme .role-signup-card::before {
+  background: linear-gradient(90deg, #7c3aed 0%, #a855f7 50%, #7c3aed 100%);
+}
+
+.delivery-theme .signup-card::before,
+.delivery-theme .role-signup-card::before {
+  background: linear-gradient(90deg, #0891b2 0%, #22d3ee 50%, #0891b2 100%);
+}
+
+/* Step indicator - professional design */
+.step-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem !important;
+  margin-bottom: 1.25rem !important;
+  padding: 1rem 0 !important;
+}
+
+.step-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.step-number,
+.step-circle {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.95rem !important;
+  background: #e2e8f0;
+  color: #94a3b8;
+  border: 3px solid #cbd5e1;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  z-index: 2;
+}
+
+.step-item.active .step-number,
+.step-item.active .step-circle,
+.step.active .step-circle {
+  background: linear-gradient(135deg, #ff6b1a, #ff8c42);
+  color: white;
+  border-color: #ff6b1a;
+  box-shadow: 0 0 0 4px rgba(255, 107, 26, 0.2),
+    0 6px 20px rgba(255, 107, 26, 0.3);
+  transform: scale(1.15);
+}
+
+.step-item.completed .step-number,
+.step-item.completed .step-circle,
+.step.completed .step-circle {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  border-color: #22c55e;
+  transform: scale(1.05);
+}
+
+.step-item.completed .step-number::after,
+.step-item.completed .step-circle::after,
+.step.completed .step-circle::after {
+  content: "✓";
+  position: absolute;
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.step-connector,
+.step-line {
+  width: 45px !important;
+  height: 3px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  transition: all 0.4s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.step-item.completed + .step-connector,
+.step.completed + .step-line {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+/* Restaurant theme steps */
+.restaurant-theme .step-item.active .step-number,
+.restaurant-theme .step-item.active .step-circle,
+.restaurant-theme .step.active .step-circle {
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.2),
+    0 6px 20px rgba(124, 58, 237, 0.3);
+}
+
+/* Delivery theme steps */
+.delivery-theme .step-item.active .step-number,
+.delivery-theme .step-item.active .step-circle,
+.delivery-theme .step.active .step-circle {
+  background: linear-gradient(135deg, #0891b2, #06b6d4);
+  border-color: #0891b2;
+  box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.2),
+    0 6px 20px rgba(8, 145, 178, 0.3);
+}
+
+/* Form steps - same styling as login forms */
+.signup-form-step,
+.form-step {
+  display: none;
+  animation: fadeInScale 0.4s ease-out;
+}
+
+.signup-form-step.active,
+.form-step.active {
+  display: block;
+}
+
+.signup-form-step.hidden,
+.form-step.hidden {
+  display: none;
+}
+
+/* Form groups - match login */
+.signup-form-group,
+.form-step .form-group,
+.form-step .role-form-group {
+  margin-bottom: 1rem !important;
+}
+
+/* Labels - match login */
+.signup-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 0.875rem !important;
+  color: #1e293b;
+  margin-bottom: 0.4rem !important;
+  letter-spacing: 0.01em;
+}
+
+/* Inputs - match login exactly */
+.signup-input,
+.form-step .form-control,
+.form-step .role-input,
+.form-step input,
+.form-step select,
+.form-step textarea {
+  width: 100%;
+  padding: 0.75rem 1rem !important;
+  font-size: 0.95rem !important;
+  font-weight: 500;
+  color: #1e293b;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px !important;
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: "Inter", sans-serif;
+}
+
+.signup-input:hover,
+.form-step input:hover,
+.form-step select:hover {
+  border-color: #cbd5e1;
+  background: #ffffff;
+}
+
+.signup-input:focus,
+.form-step .form-control:focus,
+.form-step .role-input:focus,
+.form-step input:focus,
+.form-step select:focus,
+.form-step textarea:focus {
+  border-color: #ff6b1a;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(255, 107, 26, 0.1),
+    0 4px 15px rgba(255, 107, 26, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Restaurant theme focus */
+.restaurant-theme .signup-input:focus,
+.restaurant-theme .form-step input:focus,
+.restaurant-theme .form-step select:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1),
+    0 4px 15px rgba(124, 58, 237, 0.15);
+}
+
+/* Delivery theme focus */
+.delivery-theme .signup-input:focus,
+.delivery-theme .form-step input:focus,
+.delivery-theme .form-step select:focus {
+  border-color: #0891b2;
+  box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1),
+    0 4px 15px rgba(8, 145, 178, 0.15);
+}
+
+/* Select elements */
+.signup-input select,
+.form-step select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem !important;
+}
+
+/* Password wrapper */
+.signup-password-wrapper,
+.form-step .password-wrapper {
+  position: relative;
+}
+
+.signup-password-toggle,
+.form-step .password-toggle,
+.form-step .role-password-toggle {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  width: 36px;
+  height: 36px;
+}
+
+.signup-password-toggle:hover,
+.form-step .password-toggle:hover,
+.form-step .role-password-toggle:hover {
+  color: #ff6b1a;
+  background: rgba(255, 107, 26, 0.1);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.signup-password-toggle svg,
+.form-step .password-toggle svg,
+.form-step .role-password-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Step navigation buttons */
+.step-buttons,
+.step-navigation {
+  display: flex;
+  gap: 0.75rem !important;
+  margin-top: 1.25rem !important;
+}
+
+.btn-back,
+.step-back-btn {
+  flex: 1;
+  padding: 0.85rem 1.5rem !important;
+  font-size: 0.9rem !important;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #475569;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px !important;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-back:hover,
+.step-back-btn:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-next,
+.step-next-btn,
+.signup-submit-btn {
+  flex: 1;
+  padding: 0.85rem 1.5rem !important;
+  font-size: 0.95rem !important;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, #ff6b1a 0%, #ff8c42 100%);
+  border: none;
+  border-radius: 12px !important;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 6px 20px rgba(255, 107, 26, 0.35), 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-next::before,
+.step-next-btn::before,
+.signup-submit-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.btn-next:hover,
+.step-next-btn:hover,
+.signup-submit-btn:hover {
+  background: linear-gradient(135deg, #ff5500 0%, #ff6b1a 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(255, 107, 26, 0.45),
+    0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.btn-next:hover::before,
+.step-next-btn:hover::before,
+.signup-submit-btn:hover::before {
+  left: 100%;
+}
+
+.btn-next:active,
+.step-next-btn:active,
+.signup-submit-btn:active {
+  transform: translateY(-1px);
+}
+
+.btn-next:disabled,
+.step-next-btn:disabled,
+.signup-submit-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+/* Restaurant theme buttons */
+.restaurant-theme .btn-next,
+.restaurant-theme .step-next-btn,
+.restaurant-theme .signup-submit-btn {
+  background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35), 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.restaurant-theme .btn-next:hover,
+.restaurant-theme .step-next-btn:hover,
+.restaurant-theme .signup-submit-btn:hover {
+  background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.45),
+    0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Delivery theme buttons */
+.delivery-theme .btn-next,
+.delivery-theme .step-next-btn,
+.delivery-theme .signup-submit-btn {
+  background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+  box-shadow: 0 6px 20px rgba(8, 145, 178, 0.35), 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.delivery-theme .btn-next:hover,
+.delivery-theme .step-next-btn:hover,
+.delivery-theme .signup-submit-btn:hover {
+  background: linear-gradient(135deg, #0e7490 0%, #0891b2 100%);
+  box-shadow: 0 10px 30px rgba(8, 145, 178, 0.45),
+    0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Loading state */
+.btn-next.loading,
+.step-next-btn.loading,
+.signup-submit-btn.loading {
+  pointer-events: none;
+  position: relative;
+  color: transparent;
+}
+
+.btn-next .spinner,
+.step-next-btn .spinner,
+.signup-submit-btn .spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* Error messages - match login */
+.signup-error,
+.form-step .error-message,
+.form-step .role-error-message {
+  padding: 0.75rem 1rem !important;
+  border-radius: 10px !important;
+  font-weight: 600;
+  font-size: 0.875rem !important;
+  margin-bottom: 1rem !important;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  animation: slideInDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  color: #dc2626;
+  border: 2px solid #fca5a5;
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.15);
+}
+
+.signup-error::before,
+.form-step .error-message::before,
+.form-step .role-error-message::before {
+  content: "⚠";
+  font-size: 1.5rem;
+}
+
+/* Success messages */
+.signup-success,
+.success-message {
+  padding: 0.75rem 1rem !important;
+  border-radius: 10px !important;
+  font-weight: 600;
+  font-size: 0.875rem !important;
+  margin-bottom: 1rem !important;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  animation: slideInDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  color: #16a34a;
+  border: 2px solid #86efac;
+  box-shadow: 0 4px 15px rgba(22, 163, 74, 0.15);
+}
+
+.signup-success::before,
+.success-message::before {
+  content: "✓";
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Footer - match login */
+.signup-footer {
+  text-align: center;
+  margin-top: 1.25rem !important;
+  padding-top: 1.25rem !important;
+  border-top: 2px solid #e2e8f0;
+}
+
+.signup-footer p {
+  color: #64748b;
+  font-size: 0.875rem !important;
+  font-weight: 500;
+  margin: 0;
+}
+
+.signup-footer a,
+.login-link {
+  color: #ff6b1a;
+  text-decoration: none;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.signup-footer a::after,
+.login-link::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #ff6b1a;
+  transition: width 0.3s ease;
+}
+
+.signup-footer a:hover,
+.login-link:hover {
+  color: #ff5500;
+}
+
+.signup-footer a:hover::after,
+.login-link:hover::after {
+  width: 100%;
+}
+
+/* Restaurant theme footer */
+.restaurant-theme .signup-footer a,
+.restaurant-theme .login-link {
+  color: #7c3aed;
+}
+
+.restaurant-theme .signup-footer a::after,
+.restaurant-theme .login-link::after {
+  background: #7c3aed;
+}
+
+/* Delivery theme footer */
+.delivery-theme .signup-footer a,
+.delivery-theme .login-link {
+  color: #0891b2;
+}
+
+.delivery-theme .signup-footer a::after,
+.delivery-theme .login-link::after {
+  background: #0891b2;
+}
+
+/* Grid layouts for form fields */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Checkbox and radio styling */
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.form-check input[type="checkbox"],
+.form-check input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #ff6b1a;
+}
+
+.restaurant-theme .form-check input[type="checkbox"],
+.restaurant-theme .form-check input[type="radio"] {
+  accent-color: #7c3aed;
+}
+
+.delivery-theme .form-check input[type="checkbox"],
+.delivery-theme .form-check input[type="radio"] {
+  accent-color: #0891b2;
+}
+
+.form-check label {
+  font-size: 0.875rem;
+  color: #475569;
+  cursor: pointer;
+  margin: 0;
+}
+
+/* Terms and conditions link */
+.terms-link {
+  color: #ff6b1a;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.terms-link:hover {
+  color: #ff5500;
+}
+
+.restaurant-theme .terms-link {
+  color: #7c3aed;
+}
+
+.delivery-theme .terms-link {
+  color: #0891b2;
+}
+
+/* File input styling */
+input[type="file"] {
+  padding: 0.5rem !important;
+  font-size: 0.875rem !important;
+}
+
+/* Textarea styling */
+textarea {
+  min-height: 100px;
+  resize: vertical;
+  font-family: "Inter", sans-serif !important;
+}
+
+/* Helper text */
+.helper-text {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+/* Required indicator */
+.required {
+  color: #ef4444;
+  margin-left: 0.25rem;
+}
+
+/* Validation feedback */
+.invalid-feedback {
+  color: #dc2626;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.invalid-feedback::before {
+  content: "⚠";
+  font-size: 0.875rem;
+}
+
+.valid-feedback {
+  color: #16a34a;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.valid-feedback::before {
+  content: "✓";
+  font-size: 0.875rem;
+}
+
+/* Progress bar for password strength */
+.password-strength {
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 2px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.password-strength-bar {
+  height: 100%;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.password-strength-bar.weak {
+  width: 33%;
+  background: #ef4444;
+}
+
+.password-strength-bar.medium {
+  width: 66%;
+  background: #f59e0b;
+}
+
+.password-strength-bar.strong {
+  width: 100%;
+  background: #22c55e;
+}
+
+/* Ensure consistent form spacing */
+.form-step .form-group:last-child,
+.form-step .role-form-group:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Animation for step transitions */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

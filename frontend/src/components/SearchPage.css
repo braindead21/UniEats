@@ -1,0 +1,562 @@
+/* ========================================
+   SEARCH PAGE - SWIGGY-STYLE FULL SCREEN
+   ======================================== */
+
+.search-page-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  z-index: 100000 !important;
+  animation: fadeIn 0.2s ease;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: stretch !important;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.search-page {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 600px !important;
+  height: 100% !important;
+  background: white !important;
+  animation: slideInRight 0.3s ease;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  z-index: 100001 !important;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.25) !important;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Header */
+.search-page-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: white;
+  border-bottom: 1px solid #f1f5f9;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.back-btn:hover {
+  background: #f1f5f9;
+  color: #ff6b35;
+}
+
+.search-input-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  gap: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.search-input-container:focus-within {
+  background: white;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1),
+    0 0 20px rgba(255, 107, 53, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
+  animation: inputGlow 0.3s ease-out;
+}
+
+@keyframes inputGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 107, 53, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(255, 107, 53, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1),
+      0 0 20px rgba(255, 107, 53, 0.15);
+  }
+}
+
+.search-icon {
+  font-size: 1.25rem;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 1rem;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.search-input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.clear-search-btn {
+  background: #f1f5f9;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.clear-search-btn:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  transform: rotate(90deg);
+}
+
+/* Content */
+.search-page-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+/* Recent Searches */
+.recent-searches-section {
+  margin-bottom: 2rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-header h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.clear-all-btn {
+  background: none;
+  border: none;
+  color: #ff6b35;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.clear-all-btn:hover {
+  background: rgba(255, 107, 53, 0.1);
+}
+
+.recent-searches-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.recent-search-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.recent-search-item:hover {
+  background: white;
+  border-color: #ff6b35;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.1);
+  transform: translateX(4px);
+}
+
+.clock-icon {
+  font-size: 1.1rem;
+  color: #94a3b8;
+}
+
+.recent-search-text {
+  flex: 1;
+  color: #475569;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+/* Popular Cuisines */
+.popular-cuisines-section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 1.25rem 0;
+}
+
+.cuisines-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+}
+
+.cuisine-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.25rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cuisine-card:hover {
+  border-color: #ff6b35;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.15);
+  transform: translateY(-4px);
+}
+
+.cuisine-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fff5f0 0%, #ffe5d0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cuisine-emoji {
+  font-size: 2rem;
+}
+
+.cuisine-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  margin: 0;
+  text-align: center;
+}
+
+/* Search Results */
+.search-results-section {
+  animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.results-category {
+  margin-bottom: 2rem;
+}
+
+.results-category-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+  padding: 0.5rem 0;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.category-icon {
+  font-size: 1.25rem;
+}
+
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.result-item:hover {
+  border-color: #ff6b35;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.15);
+  transform: translateX(4px);
+}
+
+.result-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.result-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.result-name {
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-restaurant {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-price,
+.result-rating {
+  font-weight: 700;
+  color: #ff6b35;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+/* No Results */
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.no-results-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.no-results h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+}
+
+.no-results p {
+  font-size: 1rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .search-page {
+    max-width: 100% !important;
+  }
+
+  .cuisines-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 0.875rem;
+  }
+
+  .cuisine-card {
+    padding: 1rem 0.5rem;
+  }
+
+  .cuisine-image {
+    width: 50px;
+    height: 50px;
+  }
+
+  .cuisine-emoji {
+    font-size: 1.75rem;
+  }
+
+  .cuisine-name {
+    font-size: 0.8rem;
+  }
+
+  .search-page-content {
+    padding: 1rem;
+  }
+
+  .result-image {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* ============================================
+   SEARCH RESULTS STAGGER
+   Results appear one by one
+   ============================================ */
+
+.search-result-item,
+.restaurant-result-item,
+.food-result-item {
+  animation: fadeInUp 0.3s ease-out backwards;
+}
+
+.search-result-item:nth-child(1),
+.restaurant-result-item:nth-child(1),
+.food-result-item:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.search-result-item:nth-child(2),
+.restaurant-result-item:nth-child(2),
+.food-result-item:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.search-result-item:nth-child(3),
+.restaurant-result-item:nth-child(3),
+.food-result-item:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.search-result-item:nth-child(4),
+.restaurant-result-item:nth-child(4),
+.food-result-item:nth-child(4) {
+  animation-delay: 0.2s;
+}
+
+.search-result-item:nth-child(5),
+.restaurant-result-item:nth-child(5),
+.food-result-item:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+.search-result-item:nth-child(6),
+.restaurant-result-item:nth-child(6),
+.food-result-item:nth-child(6) {
+  animation-delay: 0.3s;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Add hover effect while we're here */
+.search-result-item,
+.restaurant-result-item,
+.food-result-item {
+  transition: all 0.2s ease;
+}
+
+.search-result-item:hover,
+.restaurant-result-item:hover,
+.food-result-item:hover {
+  transform: translateX(8px);
+  background: #fafafa;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Scrollbar Styling */
+.search-page-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search-page-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.search-page-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.search-page-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

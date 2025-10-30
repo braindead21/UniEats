@@ -203,6 +203,14 @@ class ApiService {
       method: 'POST',
     }),
   };
+
+  // Payment endpoints
+  payment = {
+    createOrder: (orderData) => this.post('/payment/create-order', orderData),
+    verifyPayment: (paymentData) => this.post('/payment/verify-payment', paymentData),
+    paymentFailed: (failureData) => this.post('/payment/payment-failed', failureData),
+    getDetails: (orderId) => this.get(`/payment/${orderId}`),
+  };
 }
 
 const api = new ApiService();

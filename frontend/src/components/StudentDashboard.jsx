@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { api } from '../services/api';
+import SavedAddresses from './SavedAddresses';
 import { 
   FiUser, FiPackage, FiShoppingCart, FiDollarSign, 
   FiHeart, FiRefreshCw, FiMail, FiPhone, FiCalendar, 
@@ -157,6 +158,12 @@ const StudentDashboard = () => {
         >
           <FiHeart className="tab-icon" /> Favorites
         </button>
+        <button 
+          className={`dashboard-tab ${activeTab === 'addresses' ? 'active' : ''}`}
+          onClick={() => setActiveTab('addresses')}
+        >
+          <FiMapPin className="tab-icon" /> Addresses
+        </button>
       </div>
 
       {/* Profile Tab */}
@@ -310,6 +317,13 @@ const StudentDashboard = () => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Addresses Tab */}
+      {activeTab === 'addresses' && (
+        <div className="dashboard-content">
+          <SavedAddresses showActions={true} />
         </div>
       )}
     </div>

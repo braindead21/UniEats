@@ -26,6 +26,8 @@ const restaurantOwnerRoutes = require('./routes/restaurantOwner');
 const deliveryPartnerRoutes = require('./routes/deliveryPartner');
 const adminRoutes = require('./routes/admin');
 const profileRoutes = require('./routes/profile');
+const paymentRoutes = require('./routes/payment');
+const addressValidationRoutes = require('./routes/addressValidation');
 
 // Mount routers
 app.use('/api/auth', authRoutes);
@@ -37,6 +39,8 @@ app.use('/api/restaurant-owner', restaurantOwnerRoutes);
 app.use('/api/deliveryPartner', deliveryPartnerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/payment', paymentRoutes);
+app.use('/api/address', addressValidationRoutes);
 
 // Home route (should be the only accessible root route)
 app.get('/', (req, res) => {
